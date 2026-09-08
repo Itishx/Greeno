@@ -1,0 +1,9 @@
+node_modules/
+.env
+dist/
+out/
+app/lib/engine.cjs
+*.log
+.DS_Store
+app/native/greeno-hotkey
+dist-web/

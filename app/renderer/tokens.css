@@ -1,0 +1,191 @@
+/* The design system.
+ *
+ * Editorial, in the Wispr Flow manner: a classical serif at REGULAR weight for
+ * display, a clean grotesque for everything you operate, a cream canvas, and no
+ * shadows anywhere. Authority comes from scale, never from bold.
+ *
+ * Three rules that are easy to break and expensive to break:
+ *   1. Display is EB Garamond 400. Never bold. If it needs more presence, make
+ *      it bigger, do not make it heavier.
+ *   2. Lavender is the ONLY primary action colour. Never a green button, never a
+ *      blue one, however tempting.
+ *   3. No box-shadows. Elevation is a 2px ink border. Editorial flatness.
+ */
+
+/* Variable fonts: one file each covers the whole range. */
+@font-face {
+  font-family: "EB Garamond";
+  src: url("fonts/EBGaramond-400.woff2") format("woff2");
+  font-weight: 400 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "EB Garamond";
+  src: url("fonts/EBGaramond-400i.woff2") format("woff2");
+  font-weight: 400 500; font-style: italic; font-display: swap;
+}
+@font-face {
+  font-family: "Figtree";
+  src: url("fonts/Figtree-400.woff2") format("woff2");
+  font-weight: 400 700; font-style: normal; font-display: swap;
+}
+
+:root {
+  /* ── the palette, with each colour's actual job ──────────────────────────
+   *
+   * Two groups, and the split is what makes dark mode possible at all.
+   *
+   * FLIPPING: canvas, surface, ink, stone, fog, charcoal. These invert.
+   * FIXED: forest, lavender, ember, on-dark. These are the brand, and they are
+   *   the same colour in both themes. --on-dark in particular is the text that
+   *   sits on the forest rail: it must stay cream even in dark mode, or the rail
+   *   ends up with dark text on a dark green ground.
+   *
+   * An earlier version had one --cream token doing canvas AND rail text, which
+   * cannot be inverted without breaking one of the two.
+   */
+  --canvas:    #ffffeb;   /* Lumen Cream. The dominant page ground */
+  --surface:   #ffffeb;   /* Card surfaces */
+  --stone:     #e4e4d0;   /* Lumen Stone. Subtle borders, pill backgrounds */
+  --ink:       #1a1a1a;   /* Vast Ink. Primary text and every border */
+  --charcoal:  #222222;   /* Secondary button and nav text */
+  --fog:       #8a8a80;   /* Muted captions and helper text */
+
+  --forest:    #034f46;   /* Forest Ink. The rail, and the badge surface */
+  --lavender:  #f0d7ff;   /* Lavender Whisper. The ONLY primary action colour */
+  --ember:     #ffa946;   /* Ember Glow. Live and active states, nothing else */
+  --on-dark:   #ffffeb;   /* Text on forest. Fixed: never inverts */
+  --on-lavender: #1a1a1a; /* Text on the CTA. Fixed: lavender is light in both */
+  --white:     #ffffff;
+
+  /* Kept so nothing that still says --cream breaks. Prefer --canvas. */
+  --cream:     #ffffeb;
+
+  /* Greeno's own body colours, so the mascot and the UI agree. */
+  --greeno-light: #8ecb6a;
+  --greeno:       #66b04a;
+  --greeno-dark:  #3f7a34;
+
+  /* ── type ─────────────────────────────────────────────────────────────── */
+  --display: "EB Garamond", "Iowan Old Style", Georgia, serif;
+  --body: "Figtree", -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+
+  /* ── the 8px scale ────────────────────────────────────────────────────── */
+  --s1: 8px;   --s2: 16px;  --s3: 24px;  --s4: 32px;
+  --s5: 40px;  --s6: 48px;  --s7: 64px;  --s8: 80px;  --s9: 96px;
+
+  /* ── radius ───────────────────────────────────────────────────────────── */
+  --r-btn: 12px;
+  --r-input: 12px;
+  --r-card: 32px;
+  --r-card-dark: 40px;
+  --r-pill: 9999px;
+
+  --border: 2px solid var(--ink);
+
+  color-scheme: light dark;
+  font-family: var(--body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Dark is a token override and nothing else. Only the flipping group is
+   redefined; forest, lavender, ember and the two on-* tokens keep the values
+   they were given above. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas:   #13130d;
+    --surface:  #1b1b14;
+    --stone:    #34342a;
+    --ink:      #f2f2e2;
+    --charcoal: #d9d9c9;
+    --fog:      #90907f;
+    /* Lifted just enough to separate the rail from a dark page. */
+    --forest:   #08695c;
+    --cream:    #13130d;
+  }
+}
+
+:root[data-theme="dark"] {
+  --canvas:   #13130d;
+  --surface:  #1b1b14;
+  --stone:    #34342a;
+  --ink:      #f2f2e2;
+  --charcoal: #d9d9c9;
+  --fog:      #90907f;
+  --forest:   #08695c;
+  --cream:    #13130d;
+}
+
+/* Display type. Regular weight, tight tracking, and the tracking gets tighter as
+   the size goes up, which is the whole reason it holds together at 120px. */
+.display {
+  font-family: var(--display);
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+  margin: 0;
+}
+.display-120 { font-size: 120px; letter-spacing: -3.6px; line-height: 0.85; }
+.display-64  { font-size: 64px;  letter-spacing: -1.92px; line-height: 0.95; }
+.display-48  { font-size: 48px;  letter-spacing: -1.44px; line-height: 1.02; }
+.display-32  { font-size: 32px;  letter-spacing: -0.96px; line-height: 1.1; }
+
+/* The signature: the emphasised phrase goes italic, and it is the only emphasis
+   the display type ever gets. */
+.em { font-style: italic; }
+
+.muted { color: var(--fog); }
+
+/* Badges are pills. Forest Ink is the badge surface. */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--body); font-weight: 600; font-size: 12px;
+  letter-spacing: 0.02em;
+  padding: 6px 12px; border-radius: var(--r-pill);
+  background: var(--forest); color: var(--on-dark);
+}
+.badge-quiet { background: var(--stone); color: var(--charcoal); }
+
+/* Every interactive thing carries a 2px ink border. That IS the elevation. */
+.btn {
+  font-family: var(--body); font-weight: 600; font-size: 15px;
+  padding: 12px 22px; border-radius: var(--r-btn);
+  border: var(--border); background: var(--surface); color: var(--ink);
+  cursor: pointer; box-shadow: none; white-space: nowrap;
+  transition: background 160ms ease, transform 120ms ease;
+}
+.btn:hover { background: var(--stone); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .38; cursor: default; transform: none; }
+
+/* The one primary action colour. Do not add a second. */
+.btn-primary { background: var(--lavender); color: var(--on-lavender); }
+.btn-primary:hover { background: #e7c6ff; }
+
+.btn-quiet { border-color: transparent; background: transparent; color: var(--charcoal); }
+.btn-quiet:hover { background: var(--stone); }
+
+.card {
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--r-card);
+  box-shadow: none;
+}
+.card-dark {
+  background: var(--forest);
+  color: var(--on-dark);
+  border-radius: var(--r-card-dark);
+  border: 2px solid var(--forest);
+}
+
+.reveal { opacity: 0; transform: translateY(24px);
+          transition: opacity .7s ease, transform .7s cubic-bezier(.22, 1, .36, 1); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* Wide content scrolls inside its own container. The body never scrolls sideways. */
+.scroll-x { overflow-x: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .reveal { transition: none; }
+}

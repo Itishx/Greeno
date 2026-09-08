@@ -1,0 +1,263 @@
+/* His first day on the job. The wow shot, so it is protected:
+   Greeno asks on the dark rail, the notebook builds live in the card.
+
+   Editorial rules, all three load-bearing:
+     display type is EB Garamond 400 and never bold
+     lavender is the only primary action colour
+     there are no shadows anywhere, elevation is a 2px ink border */
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%; margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--body);
+  overflow: hidden;
+}
+
+/* The window is titleBarStyle hiddenInset, so it needs somewhere to be dragged. */
+.drag { position: fixed; inset: 0 0 auto 0; height: 36px; -webkit-app-region: drag; z-index: 5; }
+button, input, textarea, .no-drag { -webkit-app-region: no-drag; }
+
+.shell { height: 100%; padding: var(--s2); display: grid; }
+
+.ob {
+  border: var(--border);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  display: grid;
+  /* Questions left, notebook right. The notebook scrolls on its own so a long
+     list never pushes the question off screen. */
+  grid-template-columns: minmax(320px, .86fr) minmax(0, 1.14fr);
+  min-height: 0;
+  background: var(--surface);
+}
+
+/* ── the rail: Greeno, and what he is asking ─────────────────────────────── */
+.ob-ask {
+  background: var(--forest);
+  color: var(--on-dark);
+  padding: var(--s4) var(--s3) var(--s3);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--s2);
+  min-height: 0;
+}
+
+.ob-mark { display: flex; align-items: center; gap: 10px; }
+.ob-mark-badge {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: rgba(255, 255, 235, .1);
+  border: 1px solid rgba(255, 255, 235, .22);
+  display: grid; place-items: center;
+}
+.ob-mark-badge svg { width: 26px; height: 26px; display: block; }
+.ob-mark-name { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.ob-mark-sub { font-size: 12px; color: rgba(255, 255, 235, .58); margin-top: 1px; }
+
+/* The question. Display type, regular weight, and its authority comes entirely
+   from scale. The emphasised phrase goes italic and nothing else does. */
+.ob-q { align-self: center; min-height: 0; display: grid; align-content: center; gap: var(--s2); }
+.ob-q-label {
+  font-family: var(--body); font-weight: 600; font-size: 11px;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(255, 255, 235, .52);
+}
+.ob-q-text {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(30px, 3.3vw, 46px);
+  line-height: 1.02;
+  letter-spacing: -.03em;
+  margin: 0;
+  color: var(--on-dark);
+  text-wrap: balance;
+}
+.ob-q-text .em { font-style: italic; }
+.ob-q-hint { font-size: 14px; line-height: 1.5; color: rgba(255, 255, 235, .62); margin: 0; }
+
+/* What he heard. Ember is the live state and the only thing it is used for. */
+.ob-heard {
+  font-size: 14px; line-height: 1.55;
+  color: rgba(255, 255, 235, .86);
+  background: rgba(255, 255, 235, .07);
+  border: 1px solid rgba(255, 255, 235, .18);
+  border-radius: var(--r-input);
+  padding: 12px 14px;
+  max-height: 26vh; overflow-y: auto;
+  white-space: pre-wrap;
+}
+.ob-heard:empty { display: none; }
+.ob-heard.is-live { border-color: var(--ember); }
+
+.ob-mic-row { display: flex; align-items: center; gap: 14px; }
+.ob-mic {
+  width: 58px; height: 58px; flex: 0 0 58px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--on-dark);
+  background: transparent;
+  color: var(--on-dark);
+  display: grid; place-items: center;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, box-shadow 120ms linear;
+}
+.ob-mic:hover { background: rgba(255, 255, 235, .12); }
+.ob-mic:disabled { opacity: .38; cursor: default; }
+.ob-mic svg { width: 22px; height: 22px; }
+.ob-mic.is-live {
+  background: var(--ember); border-color: var(--ember); color: var(--ink);
+  box-shadow: 0 0 0 var(--pulse, 6px) rgba(255, 169, 70, .22);
+}
+.ob-mic-hint { font-size: 13px; line-height: 1.45; color: rgba(255, 255, 235, .62); }
+.ob-mic-hint b { color: var(--on-dark); font-weight: 600; }
+
+/* The stepper. The five questions ARE the steps, so there is no second list. */
+.ob-steps { display: grid; gap: 0; margin-bottom: var(--s2); }
+.ob-step {
+  display: grid; grid-template-columns: 15px 1fr; gap: 11px; align-items: center;
+  padding: 7px 0; font-size: 13px;
+  color: rgba(255, 255, 235, .5);
+}
+.ob-step-dot {
+  width: 13px; height: 13px; border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 235, .34);
+  display: grid; place-items: center;
+}
+.ob-step.is-done { color: rgba(255, 255, 235, .74); }
+.ob-step.is-done .ob-step-dot { background: var(--on-dark); border-color: var(--on-dark); }
+.ob-step.is-done .ob-step-dot::after {
+  content: ""; width: 5px; height: 2.5px;
+  border-left: 1.5px solid var(--forest); border-bottom: 1.5px solid var(--forest);
+  transform: rotate(-45deg) translate(.5px, -.5px);
+}
+.ob-step.is-now { color: var(--on-dark); font-weight: 600; }
+.ob-step.is-now .ob-step-dot { border-color: var(--ember); }
+.ob-step.is-now .ob-step-dot::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ember); }
+
+.ob-rail-foot {
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid rgba(255, 255, 235, .16); padding-top: var(--s2);
+}
+.ob-link {
+  background: none; border: 0; color: rgba(255, 255, 235, .58); cursor: pointer;
+  font-family: var(--body); font-size: 13px; font-weight: 500; padding: 4px 0;
+}
+.ob-link:hover { color: var(--on-dark); }
+
+/* ── the card: the notebook, building live ──────────────────────────────── */
+.ob-book {
+  padding: var(--s4) var(--s5) 0;
+  display: grid; grid-template-rows: auto 1fr auto;
+  min-height: 0; background: var(--surface);
+}
+
+.ob-book-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s2); }
+.ob-book-title {
+  font-family: var(--display); font-weight: 400;
+  font-size: 32px; letter-spacing: -.96px; line-height: 1.1; margin: 0; color: var(--ink);
+}
+.ob-book-sub { font-size: 14px; color: var(--fog); margin: 8px 0 0; line-height: 1.5; max-width: 52ch; }
+.ob-book-count {
+  font-family: var(--body); font-weight: 600; font-size: 11px;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--fog); white-space: nowrap;
+}
+
+.ob-book-scroll { overflow-y: auto; min-height: 0; padding: var(--s3) 0 var(--s1); display: grid; gap: var(--s2); align-content: start; }
+
+/* The three sections, and they are the three the product is. */
+.ob-sec {
+  border: 1px solid var(--stone);
+  border-radius: 20px;
+  padding: var(--s2) 18px;
+  background: var(--surface);
+  transition: border-color .3s ease;
+}
+.ob-sec.is-focused { border: var(--border); }
+
+.ob-sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.ob-sec-tag {
+  font-family: var(--body); font-weight: 600; font-size: 11px;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--on-dark); background: var(--forest);
+  padding: 5px 10px; border-radius: var(--r-pill);
+}
+.ob-sec-note { font-size: 12.5px; color: var(--fog); }
+
+.ob-rows { display: grid; }
+.ob-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: baseline;
+  padding: 10px 4px; border-bottom: 1px solid var(--stone);
+  font-size: 14px; color: var(--ink); border-radius: 6px;
+}
+.ob-row:last-child { border-bottom: 0; }
+.ob-row-main { min-width: 0; }
+.ob-row-title { font-weight: 500; }
+.ob-row-why { font-size: 12.5px; color: var(--fog); margin-top: 3px; line-height: 1.45; }
+.ob-row-meta { font-size: 12.5px; color: var(--fog); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* A row that just arrived. ONLY rows that changed get this, or the whole panel
+   strobes on every answer and the effect is gone. */
+@keyframes ob-land {
+  from { opacity: 0; transform: translateY(8px); background: var(--lavender); }
+  to   { opacity: 1; transform: none;            background: transparent; }
+}
+.ob-row.is-new { animation: ob-land .5s cubic-bezier(.22, 1, .36, 1) both; }
+
+.ob-empty { font-size: 13px; color: var(--fog); padding: 8px 4px; font-style: italic; font-family: var(--display); font-size: 15px; }
+
+.ob-book-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s2);
+  padding: var(--s2) 0 var(--s4);
+  border-top: 1px solid var(--stone);
+}
+.ob-foot-note { font-size: 12px; color: var(--fog); display: flex; align-items: center; gap: 7px; }
+.ob-foot-note svg { width: 13px; height: 13px; opacity: .8; }
+.ob-actions { display: flex; gap: 10px; }
+
+/* ── the wake step ──────────────────────────────────────────────────────── */
+.kbd {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 9px; border-radius: 8px; background: rgba(255, 255, 235, .1);
+  border: 1px solid rgba(255, 255, 235, .28); font-size: 12px; font-weight: 600;
+  font-family: var(--body);
+}
+
+/* Greeno's lane, so he is in the room while this happens. */
+.walk-lane { position: fixed; left: 0; right: 0; bottom: 22px; height: 120px; pointer-events: none; z-index: 4; overflow: hidden; }
+.braino-walker { position: absolute; left: 0; top: 0; width: 64px; height: 78px; pointer-events: none; will-change: transform; }
+.braino-walker-flip { width: 64px; height: 78px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-row.is-new { animation: none; }
+  .ob-mic { transition: none; }
+}
+
+/* ── answering ────────────────────────────────────────────────────────────
+   Speaking is the product, so the mic is the big thing. Typing is right next to
+   it and always visible, because a demo where the microphone will not open is
+   a demo that has to keep going. */
+.ob-answer-ways { display: grid; gap: 4px; }
+.ob-type-toggle {
+  justify-self: start;
+  background: none; border: 0; padding: 0;
+  color: rgba(255, 255, 235, .58);
+  font: 500 12.5px/1.3 var(--body);
+  text-decoration: underline; text-underline-offset: 3px;
+  cursor: pointer;
+}
+.ob-type-toggle:hover { color: var(--on-dark); }
+
+.ob-typer { display: grid; gap: 10px; }
+.ob-typer textarea {
+  width: 100%; resize: none;
+  background: rgba(255, 255, 235, .07);
+  border: 1px solid rgba(255, 255, 235, .22);
+  border-radius: var(--r-input);
+  padding: 12px 14px;
+  color: var(--on-dark);
+  font: 400 14px/1.55 var(--body);
+}
+.ob-typer textarea::placeholder { color: rgba(255, 255, 235, .38); }
+.ob-typer textarea:focus { outline: none; border-color: var(--ember); }
+.ob-typer-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }

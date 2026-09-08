@@ -1,0 +1,422 @@
+@font-face {
+  font-family: "Figtree";
+  src: url("fonts/Figtree-400.woff2") format("woff2");
+  font-weight: 400 700; font-style: normal; font-display: swap;
+}
+
+/* The notch. Braino's home, and the whole product surface.
+   Geometry is fixed per state, so the spring animates between known sizes
+   rather than measuring content mid-flight. */
+
+:root {
+  /* The physical notch. The window truly starts at screen y=0, and our level is
+     above the menu bar, so the pill occupies the notch strip itself: its top
+     --nf-notch-h hides behind the camera housing and the face lives on the chin
+     below it. EVERY height below is measured from that, never in flat pixels,
+     because a flat height puts the content behind the housing where nobody can
+     see it. */
+  --nf-notch-h: 33px;
+  --nf-safe-top: max(var(--nf-notch-h), 32px);
+  --nf-content-top: calc(var(--nf-safe-top) + 20px);
+
+  /* the pill: the Dynamic Island spring */
+  --nf-spring: .55s cubic-bezier(.32, .72, 0, 1);
+  /* expanded surfaces: expo-out */
+  --nf-expo: 1050ms cubic-bezier(.22, 1, .36, 1);
+  --nf-answer-in: 420ms;
+  --nf-answer-out: 280ms;
+  --nf-coral: #e8786e;
+}
+
+html, body {
+  width: 100%; height: 100%; margin: 0;
+  overflow: hidden; background: transparent;
+  font-family: "Figtree", -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  user-select: none;
+  pointer-events: none;          /* he is never something you have to click past */
+}
+
+#stage { position: fixed; inset: 0; overflow: visible; pointer-events: none; }
+
+/* The walker lane sits under the notch and over everything else. */
+#walk-lane { position: absolute; inset: 0; pointer-events: none; }
+.braino-walker {
+  position: absolute; left: 0; top: 0;   /* all movement is transform, never left/top */
+  width: 64px; height: 78px;
+  pointer-events: none;
+  will-change: transform;
+}
+.braino-walker-flip { width: 64px; height: 78px; }
+
+/* ── the pill ─────────────────────────────────────────────────────────────── */
+.nf {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 190px; height: calc(var(--nf-notch-h) + 22px);
+  border-radius: 0 0 16px 16px;
+  background: #000;
+  color: #fff;
+  pointer-events: auto;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 1fr;
+  /* Braino's transition list, verbatim, including transform. Leaving transform
+     out means it snaps to its new value while the width is still travelling,
+     which is a small hitch right at the start of every expansion. */
+  transition:
+    width var(--nf-spring),
+    height var(--nf-spring),
+    transform var(--nf-spring),
+    border-radius var(--nf-spring),
+    box-shadow .4s ease,
+    filter .16s ease;
+  transform-origin: top center;
+  will-change: width, height, transform, border-radius;
+}
+
+/* The optional glass theme. */
+.nf.glass {
+  background: linear-gradient(180deg, rgba(12, 12, 14, .72), rgba(10, 10, 12, .58));
+  backdrop-filter: blur(26px) saturate(150%);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-top: 0;
+  box-shadow: inset 1px 1px 1px rgba(255, 255, 255, .2);
+}
+
+/* Geometry per state. This table is the state machine's whole output. */
+.nf[data-state="idle"]      { width: 190px; height: calc(var(--nf-notch-h) + 22px); }
+.nf[data-state="idle"]:hover{ width: 198px; height: calc(var(--nf-notch-h) + 25px); }
+.nf[data-state="listening"],
+.nf[data-state="speaking"]  { width: 250px; height: calc(var(--nf-notch-h) + 44px); border-radius: 0 0 26px 26px; }
+.nf[data-state="working"]   { width: 250px; height: calc(var(--nf-notch-h) + 30px); border-radius: 0 0 20px 20px; }
+.nf[data-state="input"],
+.nf[data-state="menu"],
+.nf[data-state="short"]     { width: 480px; height: calc(var(--nf-notch-h) + var(--nf-answer-short-height, 146px)); border-radius: 0 0 28px 28px; }
+.nf[data-state="thinking"],
+.nf[data-state="record"]    { width: 580px; height: calc(var(--nf-notch-h) + 70px); border-radius: 0 0 28px 28px; }
+.nf[data-state="long"]      { width: 580px; height: calc(var(--nf-notch-h) + var(--nf-answer-long-height, 240px)); border-radius: 0 0 28px 28px; }
+.nf[data-state="greeting"]  { width: 610px; height: 180px; border-radius: 0 0 30px 30px; }
+.nf[data-state="signin"]    { width: 430px; height: calc(var(--nf-notch-h) + 55px); border-radius: 0 0 24px 24px; }
+
+/* Waking replays the boot trace: the light travels the perimeter again, so the
+   gesture is answered by the same light that introduced him. Braino does this on
+   entering any mode, and it is what makes double Control feel acknowledged
+   rather than merely obeyed. */
+.nf.is-waking .nf-shine { opacity: 1; }
+.nf.is-waking .nf-shine path {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: nfShineDraw .62s cubic-bezier(.3, .5, .3, 1) forwards;
+}
+
+/* Coral is never a fill. It is his glow, his mouth, the sonar ring, the dot. */
+.nf[data-state="speaking"] { box-shadow: 0 0 34px rgba(232, 120, 110, .5); }
+.nf[data-state="listening"] { box-shadow: 0 0 26px rgba(232, 120, 110, .32); }
+
+/* ── the face ─────────────────────────────────────────────────────────────── */
+/* The face band. It starts BELOW the housing, which is the whole reason his
+   eyes are visible at all. */
+.nf-core {
+  position: absolute; left: 0; right: 0;
+  top: var(--nf-notch-h); bottom: 0;
+  display: flex; align-items: flex-start; justify-content: center;
+}
+.nf-mini { width: 78px; margin-top: -4px; display: block; }
+.nf[data-state="listening"] .nf-mini,
+.nf[data-state="speaking"] .nf-mini { width: 96px; }
+
+.nf-lid { opacity: 0; transition: opacity .18s ease; }
+.nf.is-thinking .nf-lid { opacity: 1; }
+
+/* Idle is eyes only, in the dark.
+ *
+ * Not a style choice: the mouth sits at the very bottom of the face and the pill
+ * at rest is only 22px below the housing, so a resting smile is drawn exactly on
+ * the clip edge and comes out sheared in half. Braino solved this the same way.
+ * The mouth appears when he is listening or speaking, and by then the island has
+ * grown to 44px of chin and there is room for it. */
+.nf:not([data-state="listening"]):not([data-state="speaking"]) #nf-mouth-idle { display: none; }
+
+/* ── the ink ladder ───────────────────────────────────────────────────────── */
+.nf-label {
+  font: 600 9px/1 "Figtree", system-ui; letter-spacing: .12em; text-transform: uppercase;
+  color: rgba(255, 255, 255, .6);
+}
+.nf-body  { font: 400 17px/1.48 "Figtree", system-ui; color: rgba(255, 255, 255, .68); }
+.nf-short { font: 400 17px/1.38 "Figtree", system-ui; color: #f7f7f5; }
+
+/* ── the karaoke ladder ───────────────────────────────────────────────────
+   Ported from braino-mac.css. Unspoken words sit at .28, spoken land at .84,
+   and the word being said right now is pure white with a soft bloom. The whole
+   effect is those three values, so do not "improve" them. */
+.nf-answer-word { color: rgba(255, 255, 255, .28); transition: color 120ms ease, text-shadow 120ms ease; }
+.nf-answer-word.spoken { color: rgba(255, 255, 255, .84); }
+.nf-answer-word.speaking-now { color: #fff; text-shadow: 0 0 9px rgba(255, 255, 255, .34); }
+/* No word margin here. The word splitter keeps the real whitespace between
+   words as text nodes, so adding a margin on top of it double-spaces the line.
+   (The Braino rule this is ported from applies to a splitter that drops them.) */
+
+/* ── surfaces ─────────────────────────────────────────────────────────────── */
+.nf-surface {
+  position: absolute; inset: 0;
+  padding: var(--nf-content-top) 22px 18px;
+  display: none;
+  grid-template-rows: auto 1fr auto;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity var(--nf-answer-out) ease;
+}
+.nf-surface.is-on { display: grid; opacity: 1; transition: opacity var(--nf-answer-in) cubic-bezier(.22, 1, .36, 1); }
+.nf-surface-body { overflow-y: auto; min-height: 0; }
+
+/* The greeting card is tall enough to centre in, the way Braino does it. */
+.nf-greeting { padding: var(--nf-notch-h) 26px 22px; }
+.nf-greeting .nf-body { font-size: 18px; line-height: 1.45; color: rgba(255, 255, 255, .82); }
+
+/* ── buttons ──────────────────────────────────────────────────────────────── */
+.nf-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.nf-btn {
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .12);
+  color: #f7f7f5;
+  font: 600 13px/1 "Figtree", system-ui;
+  padding: 9px 15px; border-radius: 10px; cursor: pointer;
+  transition: background .18s ease;
+}
+.nf-btn:hover { background: rgba(255, 255, 255, .12); }
+.nf-btn.primary { background: rgba(255, 255, 255, .88); color: #050505; border-color: transparent; }
+.nf-btn.primary:hover { background: #fff; }
+
+/* ── the collapsed suggestion ─────────────────────────────────────────────── */
+.nf-tease {
+  position: absolute; inset: var(--nf-notch-h) 0 0 0;
+  display: none; align-items: center; justify-content: space-between;
+  padding: 0 18px; cursor: pointer;
+}
+.nf-tease.is-on { display: flex; }
+.nf-tease-text { font: 500 13.5px/1 "Figtree", system-ui; color: #f7f7f5; }
+/* The thinking dot is coral, and it is a stroke of his attention, not a fill. */
+.nf-tease-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--nf-coral);
+  margin-right: 9px; flex: 0 0 7px;
+  animation: nfPulse 1.7s ease-in-out infinite;
+}
+.nf-tease-left { display: flex; align-items: center; }
+.nf-tease-arrow { color: rgba(255, 255, 255, .5); font-size: 15px; }
+
+@keyframes nfPulse { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+
+/* ── recording pill ───────────────────────────────────────────────────────── */
+.nf-rec { display: flex; align-items: center; gap: 10px; justify-content: center;
+          position: absolute; inset: var(--nf-notch-h) 0 0 0; }
+.nf-rec-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff5c5c; animation: nfPulse 1.1s ease-in-out infinite; }
+.nf-rec-label { font: 700 11px/1 "Figtree", system-ui; color: #ff6b6b; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+.nf-rec-meta { font: 400 12px/1 "Figtree", system-ui; color: rgba(255, 255, 255, .6); }
+
+/* ── the sonar ring, while listening ──────────────────────────────────────── */
+.nf-sonar { position: absolute; inset: var(--nf-notch-h) 0 0 0; pointer-events: none; display: none; }
+.nf[data-state="listening"] .nf-sonar { display: block; }
+.nf-sonar i {
+  position: absolute; left: 50%; top: 50%;
+  width: 40px; height: 40px; margin: -20px 0 0 -20px;
+  border-radius: 50%; border: 1px solid rgba(232, 120, 110, .5);
+  animation: nfSonar 2.4s ease-out infinite;
+}
+.nf-sonar i:nth-child(2) { animation-delay: .8s; }
+.nf-sonar i:nth-child(3) { animation-delay: 1.6s; }
+@keyframes nfSonar {
+  from { transform: scale(.6); opacity: .7; }
+  to   { transform: scale(3.4); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nf, .nf-surface { transition: none; }
+  .nf-sonar i, .nf-tease-dot, .nf-rec-dot { animation: none; }
+}
+
+/* ── the boot ──────────────────────────────────────────────────────────────
+ * Ported from Braino's runNotchBoot and the CSS behind it. Four beats:
+ *   1. a spectrum trace draws the perimeter of the notch
+ *   2. the name resolves, one letter at a time
+ *   3. the MATCH CUT: the word collapses to the width of the eye pair and the
+ *      eyes bloom from the same centre, so one becomes the other rather than
+ *      one fading while the other appears somewhere else
+ *   4. the island extends and he introduces himself
+ * Then he climbs out and the app opens behind him.
+ */
+
+.nf-boot-name, .nf-boot-eyes, .nf-boot-card {
+  position: absolute; z-index: 5; pointer-events: none;
+}
+
+/* While booting, the resting face and everything else stays under the island. */
+.nf.is-booting .nf-core,
+.nf.is-booting .nf-tease,
+.nf.is-booting .nf-surface { opacity: 0 !important; }
+
+/* ── 1. the perimeter trace ─────────────────────────────────────────────── */
+.nf-shine {
+  position: absolute; top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 190px; height: calc(var(--nf-notch-h) + 22px);
+  overflow: visible; z-index: 6; opacity: 0;
+  transition: opacity .45s ease;
+  pointer-events: none;
+}
+.nf-shine path { stroke-linecap: round; }
+.nf-shine-core { stroke-width: 2.2; }
+.nf-shine-glow { stroke-width: 7; opacity: .7; filter: blur(5px); }
+
+.nf.is-shining .nf-shine { opacity: 1; transition: opacity .25s ease; }
+.nf.is-shining .nf-shine path {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: nfShineDraw 1.6s cubic-bezier(.3, .5, .3, 1) forwards;
+}
+@keyframes nfShineDraw { to { stroke-dashoffset: 0; } }
+
+/* Boot variant. The default 1.6s draw does not finish inside the 1550ms first
+   beat, so the line was still travelling when the name arrived over it. */
+.nf.is-shine-slow .nf-shine path { animation-duration: 1.35s; }
+
+/* The pill clips its contents, and the trace is taller than the pill is at
+   rest, so the bottom of the line was cut off. Nothing during boot needs
+   clipping, so the trace gets to draw its whole shape. */
+.nf.is-booting { overflow: visible; }
+
+.nf.is-booting .nf-shine { opacity: .48; }
+.nf.is-booting .nf-shine-core { stroke-width: 1.7; opacity: .72; }
+.nf.is-booting .nf-shine-glow {
+  stroke-width: 5;
+  animation: nfPerimeterBreathe 2.8s ease-in-out infinite;
+}
+@keyframes nfPerimeterBreathe {
+  0%, 100% { opacity: .18; filter: blur(3px); }
+  50% { opacity: .34; filter: blur(5px); }
+}
+
+/* ── 2. the name ────────────────────────────────────────────────────────── */
+.nf-boot-name {
+  top: var(--nf-notch-h); left: 50%;
+  display: flex; align-items: center; justify-content: center;
+  /* Sized to the word, not to a number. A fixed width cut for a shorter name
+     is what makes a longer one look broken. */
+  gap: 1px; width: auto; height: 22px;
+  color: rgba(244, 241, 232, .64);
+  font: 500 10px/1 "Figtree", system-ui;
+  letter-spacing: .4px;
+  opacity: 0; filter: blur(2px);
+  transform: translateX(-50%) scale(.32);
+  transition: opacity .3s ease, filter .36s ease, transform .42s cubic-bezier(.4, 0, .8, .2);
+}
+.nf.is-naming .nf-boot-name { opacity: 1; filter: blur(0); transform: translateX(-50%) scale(1); }
+.nf-boot-name span { opacity: 0; transform: translateY(2px); }
+.nf.is-naming .nf-boot-name span { animation: nfLetterIn .4s cubic-bezier(.2, .7, .2, 1) forwards; }
+.nf.is-naming .nf-boot-name span:nth-child(1) { animation-delay: .100s; }
+.nf.is-naming .nf-boot-name span:nth-child(2) { animation-delay: .325s; }
+.nf.is-naming .nf-boot-name span:nth-child(3) { animation-delay: .550s; }
+.nf.is-naming .nf-boot-name span:nth-child(4) { animation-delay: .775s; }
+.nf.is-naming .nf-boot-name span:nth-child(5) { animation-delay: 1.000s; }
+.nf.is-naming .nf-boot-name span:nth-child(6) { animation-delay: 1.225s; }
+@keyframes nfLetterIn { to { opacity: 1; transform: none; } }
+
+/* ── 3. the match cut ───────────────────────────────────────────────────── */
+.nf-boot-eyes {
+  top: calc(var(--nf-notch-h) + 9px); left: 50%;
+  display: flex; gap: 7px;
+  opacity: 0; filter: blur(3px);
+  transform: translateX(-50%) scale(.28);
+  transition: opacity .36s ease .08s, filter .44s ease, transform .52s cubic-bezier(.16, .9, .25, 1);
+}
+.nf-boot-eyes i, .nf-boot-guide-eyes i {
+  display: block; width: 5px; height: 5px; border-radius: 50%;
+  background: #f4e4dc; box-shadow: 0 0 7px rgba(244, 228, 220, .28);
+}
+/* GREENO is about 44px at this size; .38 lands it on the 17px eye pair, so the
+   word does not fade out and the eyes appear elsewhere. It becomes them. */
+.nf.is-awake .nf-boot-name { opacity: 0; filter: blur(2px); transform: translateX(-50%) scale(.38); }
+.nf.is-awake .nf-boot-eyes { opacity: 1; filter: blur(0); transform: translateX(-50%) scale(1); }
+
+/* ── 4. the island extends ──────────────────────────────────────────────── */
+.nf-boot-card {
+  inset: 0; display: flex; align-items: center; justify-content: center;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity .4s ease .3s, transform .5s ease .28s;
+}
+.nf.is-greeting { width: 610px; height: 180px; border-radius: 0 0 38px 38px; }
+.nf.is-greeting .nf-shine { width: 610px; height: 180px; }
+.nf.is-greeting .nf-boot-eyes { opacity: 0; }
+.nf.is-greeting .nf-boot-card { opacity: 1; transform: none; }
+
+.nf-boot-greeting { width: 325px; }
+.nf-boot-greeting strong {
+  display: flex; align-items: baseline; gap: 8px;
+  color: #f3efe5;
+  font: 600 31px/1 "Figtree", system-ui;
+  letter-spacing: -.035em;
+}
+.nf-boot-greeting strong span { opacity: 0; filter: blur(5px); transform: translateY(7px); }
+.nf.is-greeting .nf-boot-greeting strong span { animation: nfGreetWord .52s cubic-bezier(.2, .75, .2, 1) forwards; }
+.nf.is-greeting .nf-boot-greeting strong span:nth-child(1) { animation-delay: .43s; }
+.nf.is-greeting .nf-boot-greeting strong span:nth-child(2) { animation-delay: .76s; }
+.nf.is-greeting .nf-boot-greeting strong span:nth-child(3) { animation-delay: 1.09s; }
+@keyframes nfGreetWord { to { opacity: 1; filter: blur(0); transform: none; } }
+
+.nf-boot-greeting small, .nf-boot-guide small {
+  display: block; margin-top: 10px;
+  color: rgba(243, 239, 229, .42);
+  font: 400 15px/1.35 "Figtree", system-ui;
+}
+
+.nf-boot-divider {
+  width: 1px; height: 0; margin: 0 28px;
+  background: linear-gradient(180deg, rgba(244, 207, 135, .16), rgba(142, 203, 106, .58), rgba(119, 156, 255, .16));
+  opacity: 0;
+  transition: height .65s cubic-bezier(.2, .8, .2, 1) .52s, opacity .3s ease .5s;
+}
+.nf.is-greeting .nf-boot-divider { height: 92px; opacity: 1; }
+
+.nf-boot-guide {
+  width: 165px; opacity: 0; transform: translateX(8px);
+  transition: opacity .42s ease 1.25s, transform .52s ease 1.22s;
+}
+.nf.is-greeting .nf-boot-guide { opacity: 1; transform: none; }
+.nf-boot-guide-eyes { display: flex; gap: 7px; margin-bottom: 12px; }
+.nf-boot-guide > div:not(.nf-boot-guide-eyes) { display: flex; align-items: center; gap: 6px; margin-top: 7px; }
+.nf-boot-guide kbd {
+  min-width: 29px; padding: 5px 7px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-bottom-color: rgba(255, 255, 255, .28);
+  border-radius: 7px;
+  color: rgba(255, 255, 255, .76);
+  background: rgba(255, 255, 255, .055);
+  font: 500 11px/1 "Figtree", system-ui;
+  text-align: center;
+}
+.nf-boot-guide em { color: rgba(243, 239, 229, .34); font-size: 10px; font-style: normal; }
+
+/* ── he climbs out ──────────────────────────────────────────────────────── */
+/* He is born inside the notch. Until the boot hands him the screen there is
+   nothing of him to see, and nothing of him moving around behind the animation. */
+.braino-walker { cursor: grab; opacity: 0; visibility: hidden; }
+.braino-walker.is-visible { opacity: 1; visibility: visible; }
+.braino-walker.is-draggable { pointer-events: auto; }
+.braino-walker.is-dragging { cursor: grabbing; }
+.braino-walker.is-dragging .braino-walker-flip { filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .28)); }
+
+.braino-walker.is-boot-jump svg { animation: nfWalkerJump 1.25s cubic-bezier(.18, .75, .25, 1); }
+@keyframes nfWalkerJump {
+  0%   { transform: translateY(-30px) scale(.2); opacity: 0; }
+  28%  { opacity: 1; }
+  58%  { transform: translateY(-12px) scale(1.08) rotate(-3deg); }
+  78%  { transform: translateY(5px) scale(.96) rotate(2deg); }
+  100% { transform: none; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nf-shine path, .nf-boot-name span, .nf-boot-greeting strong span,
+  .nf.is-booting .nf-shine-glow, .braino-walker.is-boot-jump svg { animation: none; }
+  .nf-boot-name, .nf-boot-eyes, .nf-boot-card, .nf-boot-divider, .nf-boot-guide { transition: none; }
+}

@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Greeno · Not an app. A someone.</title>
+<meta name="description" content="Greeno lives in your Mac notch. He learns you in one conversation, holds your day, and shows up on his own at exactly three moments: morning, when you look stuck, and night.">
+<meta property="og:title" content="Greeno · Not an app. A someone.">
+<meta property="og:description" content="The someone who runs your day. He speaks first, or he is nothing.">
+<meta property="og:type" content="website">
+<link rel="icon" href="greeno.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ── nav ──────────────────────────────────────────────────────────────── -->
+<header class="nav" id="nav">
+  <div class="nav-in">
+    <a class="mark" href="#top">
+      <span class="mark-badge"><img src="greeno.svg" alt="" width="30" height="36"></span>
+      <span class="mark-name">Greeno</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#moments">The three moments</a>
+      <a href="#does">What he does</a>
+      <a href="#boot">The boot</a>
+      <a href="#onboarding">His first day</a>
+      <a href="#notebook">The notebook</a>
+      <a href="#limits">Limits</a>
+    </nav>
+    <a class="btn btn-primary nav-cta" href="#access">Get early access</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ── hero ─────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-badges reveal">
+      <span class="badge"><span class="dot"></span>Pre-release</span>
+      <span class="badge badge-quiet">macOS · lives in the notch</span>
+    </div>
+
+    <h1 class="display d-hero reveal">Not an app.<br><span class="em">A someone.</span></h1>
+
+    <p class="lede reveal">Greeno lives in your Mac notch. He learns you in one conversation, holds
+      your day, and shows up on his own at exactly three moments: morning, when
+      you look stuck, and night.</p>
+
+    <div class="hero-actions reveal">
+      <a class="btn btn-primary btn-lg" href="#access">Get early access</a>
+      <a class="btn btn-quiet btn-lg" href="#moments">See how he shows up</a>
+    </div>
+    <p class="hero-note reveal">He speaks first, or he is nothing. That is the whole difference.</p>
+
+    <!-- the notch, running its real state machine -->
+    <div class="stage reveal" id="stage">
+      <div class="stage-bar"><i></i><i></i><i></i><span style="margin-left:8px">Your Mac, Tuesday, 9:12</span></div>
+      <div class="stage-body">
+
+        <div class="nf" id="nf" data-state="idle">
+          <!-- idle -->
+          <div class="nf-pane nf-idle on" data-pane="idle">
+            <span class="nf-face" aria-hidden="true">
+              <svg viewBox="0 0 100 60"><g fill="#fff"><ellipse cx="34" cy="26" rx="7" ry="8"/><ellipse cx="66" cy="26" rx="7" ry="8"/></g><g fill="#1B1713"><circle cx="35.5" cy="27" r="3.4"/><circle cx="67.5" cy="27" r="3.4"/></g><path d="M 40 44 Q 50 49 60 44" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="3" stroke-linecap="round"/></svg>
+            </span>
+            <span>Greeno</span>
+          </div>
+          <!-- listening -->
+          <div class="nf-pane nf-listen" data-pane="listening">
+            <span class="nf-face" aria-hidden="true">
+              <svg viewBox="0 0 100 60"><g fill="#fff"><ellipse cx="34" cy="26" rx="7" ry="8"/><ellipse cx="66" cy="26" rx="7" ry="8"/></g><g fill="#1B1713"><circle cx="35.5" cy="27" r="3.4"/><circle cx="67.5" cy="27" r="3.4"/></g><path d="M 38 42 Q 50 52 62 42" fill="none" stroke="#E8786E" stroke-width="3.4" stroke-linecap="round"/></svg>
+            </span>
+            <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <small>Listening. Talk over him if you want.</small>
+          </div>
+          <!-- working -->
+          <div class="nf-pane nf-listen" data-pane="working" style="grid-auto-flow:column;justify-content:start">
+            <span class="nf-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <small>Reading your morning.</small>
+          </div>
+          <!-- the morning greet -->
+          <div class="nf-pane" data-pane="greeting">
+            <span class="nf-label">Morning</span>
+            <div class="nf-lines" id="greetLines">
+              <p>Standup at 11.</p>
+              <p>One email actually needs you.</p>
+              <p>The deck is due Thursday, and you said mornings are for the deck.</p>
+            </div>
+            <div class="nf-foot">
+              <span class="nf-chip primary">Start the deck</span>
+              <span class="nf-chip">Later</span>
+            </div>
+          </div>
+          <!-- the stuck nudge -->
+          <div class="nf-pane" data-pane="short">
+            <span class="nf-label">Suggestion</span>
+            <p class="nf-short">You have had that same tab open for forty minutes. Want the room quiet for twenty five?</p>
+            <div class="nf-foot">
+              <span class="nf-chip primary">Talk about it</span>
+              <span class="nf-chip">Not now</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="walker" aria-hidden="true">
+          <div class="walker-in"><img src="greeno.svg" alt="" width="78" height="96"></div>
+        </div>
+        <div class="stage-floor">He is not a window you have to go and open.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── the category ─────────────────────────────────────────────────────── -->
+<section id="category">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">The category</p>
+      <h2 class="display d-64">Everyone else is racing on capability.<br><span class="em">We are racing on being a someone.</span></h2>
+      <p class="lede">A copilot is a very good tool that waits. Greeno is not a tool.
+        The thing being measured here is not answer quality, it is whether he
+        shows up and whether he knows you.</p>
+    </div>
+
+    <div class="ledger reveal scroll-x">
+      <table>
+        <thead>
+          <tr><th>&nbsp;</th><th>Copilots and assistants</th><th>Greeno</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Waits for a prompt</td><td>Always</td><td>No, he speaks first</td></tr>
+          <tr><td>Competes on</td><td>Output quality</td><td>Showing up, and knowing you</td></tr>
+          <tr><td>Feels like</td><td>A tool</td><td>A someone</td></tr>
+          <tr><td>The relationship</td><td>You use it</td><td>You cannot ghost him</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ── the three moments ────────────────────────────────────────────────── -->
+<section id="moments">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">When he shows up on his own</p>
+      <h2 class="display d-64">Three moments. <span class="em">Exactly three.</span></h2>
+      <p class="lede">A fourth is how this becomes annoying software, so there is no fourth
+        timer anywhere in the app. Everything else he does, he does because you asked.</p>
+    </div>
+
+    <div class="moments">
+      <article class="card moment reveal">
+        <span class="num">01</span>
+        <h3 class="display d-32">Morning greet</h3>
+        <p>The notch drops at your own start time, once. Your calendar, the
+          overnight mail that actually needs you, what is due, and only then the
+          thing you said you cared about. Day-stuff leads. Goals are a clause at
+          the end, never a scorecard.</p>
+        <p class="when">Inside a 45 minute window after your start time</p>
+      </article>
+
+      <article class="card moment reveal">
+        <span class="num">02</span>
+        <h3 class="display d-32">Stuck nudge</h3>
+        <p>He glances at the screen and mostly says nothing. When he does have
+          something, the notch reads "Greeno has a suggestion" and waits for you
+          to open it. Suggestions are read, never spoken at you. Then he stands
+          down.</p>
+        <p class="when">Event driven, with a 30 minute floor between nudges</p>
+      </article>
+
+      <article class="card card-dark moment is-dark reveal">
+        <span class="num">03</span>
+        <h3 class="display d-32">Night debrief</h3>
+        <p>"How did it go?" You talk for about two minutes, the notebook fills in
+          live on screen while you do, he reacts to what actually happened, and
+          the day closes.</p>
+        <p class="when">Your evening, on your say-so</p>
+      </article>
+    </div>
+
+    <div class="law reveal">
+      <strong>Nudges fire on events, never on blind timers.</strong>
+      <span>A timer that fires while you are deep in something is the single fastest way to get uninstalled.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── what he does when you call him ───────────────────────────────────── -->
+<section id="does">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">When you call him</p>
+      <h2 class="display d-64">Double-Option, and <span class="em">just talk.</span></h2>
+      <p class="lede">Tap Option twice and a live voice lane opens. You can talk over him
+        and he stops mid-word. These are not features on a shelf, they are what
+        he reaches for while doing the job.</p>
+    </div>
+
+    <div class="grid">
+      <article class="card tile reveal">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round"><path d="M4 5h16v11H9l-5 4z"/></svg></span>
+        <h3>Chat with what is in front of you</h3>
+        <p>The page, the PDF, the video. He already has it open, so you do not
+          paste anything anywhere.</p>
+      </article>
+
+      <article class="card tile reveal">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg></span>
+        <h3>Notes from anything you listen to</h3>
+        <p>Lectures, meetings, a long call. In goes the audio, out comes a clean
+          summary you can actually read afterwards.</p>
+      </article>
+
+      <article class="card tile reveal">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
+        <h3>Hera, real-time dictation</h3>
+        <p class="tag">System wide</p>
+        <p>Silent dictation into any caret on the Mac. It cleans itself in
+          chunks in the background while you keep talking.</p>
+      </article>
+
+      <article class="card tile reveal">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h11"/></svg></span>
+        <h3>Routines, not chores</h3>
+        <p>"Triage my inbox." "What is the news." Say it once and it becomes a
+          thing that happens, rather than a thing you remember.</p>
+      </article>
+
+      <article class="card tile reveal">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span>
+        <h3>Focus mode</h3>
+        <p>Notifications die on the Mac and on your iPhone, because it runs
+          through a real Shortcut and Focus syncs itself across your devices.
+          Music starts. The timer runs.</p>
+      </article>
+
+      <article class="card tile reveal">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round"><path d="M5 12l5 5L19 7"/></svg></span>
+        <h3>Delegate a one-off</h3>
+        <p>Anything that is a job rather than a conversation. He takes it, does
+          it, and tells you it is done.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ── the boot ─────────────────────────────────────────────────────────── -->
+<section id="boot">
+  <div class="wrap split">
+    <div class="reveal">
+      <p class="eyebrow">The first ten seconds</p>
+      <h2 class="display d-48">He arrives <span class="em">before the app does.</span></h2>
+      <p class="lede" style="margin-top:var(--s3)">Nothing opens on your screen until he has introduced himself. No window,
+        no form, no checklist waiting behind him. The notch traces itself, his
+        name resolves one letter at a time, and then the word collapses into the
+        width of his eyes and he is looking at you.</p>
+      <p class="lede" style="margin-top:var(--s3)">Out loud, in his own voice: <span class="em">"Hi, I am Greeno. I am here
+        to hold you accountable."</span> Then he climbs out of the notch and the
+        app opens behind him.</p>
+    </div>
+
+    <ol class="beats reveal">
+      <li><span class="ms">1.55s</span><b>The trace</b><span>A spectrum line draws the perimeter of the notch.</span></li>
+      <li><span class="ms">2.20s</span><b>The name</b><span>G R E E N O resolves, one letter at a time.</span></li>
+      <li><span class="ms">1.10s</span><b>The match cut</b><span>The word collapses to the width of the eye pair, and his eyes bloom from the same centre. One becomes the other.</span></li>
+      <li><span class="ms">1.85s</span><b>The line</b><span>The island extends and he speaks first, which is the only thing this whole product is about.</span></li>
+      <li><span class="ms">then</span><b>He climbs out</b><span>And the app opens behind him.</span></li>
+    </ol>
+  </div>
+
+  <div class="wrap">
+    <div class="law reveal" style="background:var(--stone);margin-top:clamp(36px,5vw,64px)">
+      <strong>It runs in full exactly once.</strong>
+      <span>Every launch after that is a three second wake with no speech. A seventeen second introduction every morning is a thing you would grow to hate.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── onboarding ───────────────────────────────────────────────────────── -->
+<section id="onboarding">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">His first day on the job</p>
+      <h2 class="display d-64">Seven minutes of talking.<br><span class="em">Zero typed forms.</span></h2>
+      <p class="lede">He asks five questions. You answer them out loud, the way you would
+        tell a person. The notebook builds itself on the right while you speak,
+        and at the end he reads it back for you to approve.</p>
+    </div>
+
+    <div class="ob reveal">
+      <div class="ob-ask">
+        <div class="ob-mark">
+          <span class="ob-mark-badge"><img src="greeno.svg" alt="" width="30" height="36"></span>
+          <span>
+            <span class="ob-mark-name">Greeno</span>
+            <span class="ob-mark-sub">Question 1 of 5</span>
+          </span>
+        </div>
+
+        <div class="ob-q">
+          <span class="ob-q-label">He asks</span>
+          <p class="ob-q-text">Walk me through <span class="em">a normal day.</span></p>
+          <p class="ob-heard">"Uh, I am up around seven, gym if I am honest about
+            half the time, then I am at my desk by nine. Mornings are the only
+            time my head works, so that is when I do the real thing. Afternoons
+            are meetings and email."</p>
+        </div>
+
+        <div class="ob-mic-row">
+          <span class="ob-mic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          </span>
+          <span class="ob-mic-hint">Listening. Take as long as you want.<br><b>Tap Option twice</b> to stop.</span>
+        </div>
+      </div>
+
+      <div class="ob-book">
+        <div class="ob-book-head">
+          <h3>The notebook</h3>
+          <span class="live">Filling in</span>
+        </div>
+
+        <div class="nb-sec">
+          <h4>Routines</h4>
+          <div class="nb-row nb-new"><span class="nb-time">07:00</span> Up, gym about half the time</div>
+          <div class="nb-row nb-new"><span class="nb-time">09:00</span> At the desk</div>
+          <div class="nb-row nb-new"><span class="nb-time">13:00</span> Meetings and email</div>
+        </div>
+
+        <div class="nb-sec">
+          <h4>Habits</h4>
+          <div class="nb-row">Gym <span class="nb-bar" style="--w:52%"><i></i></span> <span class="nb-n">3 of 6</span></div>
+          <div class="nb-row">Deep work before noon <span class="nb-bar" style="--w:78%"><i></i></span> <span class="nb-n">4 of 5</span></div>
+        </div>
+
+        <div class="nb-sec">
+          <h4>Focus</h4>
+          <div class="nb-row">Head is clear from 9 to 12</div>
+          <div class="nb-row">Slack is what pulls him out</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pair reveal">
+      <article class="card">
+        <h4>He takes your day in whatever shape it is in</h4>
+        <p>Connect a calendar. Drop in a photo of a timetable and approve what he
+          pulled out of it. Or just tell him, because it is in your head anyway.</p>
+      </article>
+      <article class="card">
+        <h4>Onboarding does not end at "setup complete"</h4>
+        <p>It ends the next morning, when the notch drops and the greet references
+          something you told him yesterday. That is the only proof that counts.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ── the notebook ─────────────────────────────────────────────────────── -->
+<section id="notebook">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">What he knows about you</p>
+      <h2 class="display d-64">One notebook. <span class="em">Three sections.</span></h2>
+      <p class="lede">Everything he holds lives in one place, in your words, and you can edit
+        every line of it. He references it constantly. You will barely open it.</p>
+    </div>
+
+    <div class="three">
+      <article class="card reveal">
+        <h3>Routines</h3>
+        <p>The recurring shape of your day, plus the automations you wish you
+          had. A wish is just a routine that does not exist yet.</p>
+        <p class="ex">"Mornings are for the deck." "Someone should be reading my inbox before I do."</p>
+      </article>
+      <article class="card reveal">
+        <h3>Habits</h3>
+        <p>The things with a target and a cadence. What he holds you to, and what
+          keeps slipping.</p>
+        <p class="ex">Not mentioning a habit is not the same as failing at it. He knows the difference.</p>
+      </article>
+      <article class="card reveal">
+        <h3>Focus</h3>
+        <p>When your head is actually clear, what pulls you out of it, and what
+          you listen to while you work.</p>
+        <p class="ex">"Nine to twelve, and it is Slack that ruins it."</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ── the voice ────────────────────────────────────────────────────────── -->
+<section id="voice">
+  <div class="wrap split">
+    <div class="reveal">
+      <p class="eyebrow">Talking to him</p>
+      <h2 class="display d-48">He stops mid-word <span class="em">the moment you start.</span></h2>
+      <p class="lede" style="margin-top:var(--s3)">Interrupting him is not an edge case that got handled. It is the thing
+        the whole voice pipeline was built around, because anything you cannot
+        talk over is not a conversation.</p>
+      <div class="keys" style="margin-top:var(--s5)">
+        <span class="key hit">Option</span>
+        <span class="plus">then</span>
+        <span class="key hit">Option</span>
+        <span class="plus">opens and closes the lane</span>
+      </div>
+    </div>
+
+    <ul class="speclist reveal">
+      <li>
+        <b>Barge-in is instant</b>
+        <span>The moment your voice hits the mic, his current sentence is killed. Not at the end of the sentence. Now.</span>
+      </li>
+      <li>
+        <b>His voice is his, not a preset</b>
+        <span>Turn-taking and transcription come from one system. The voice comes from another, on purpose, because a generic assistant voice would take the character with it.</span>
+      </li>
+      <li>
+        <b>He knows which mic you are on</b>
+        <span>A headset at your mouth and a laptop mic across the desk get treated differently, or the quiet half of what you said gets scrubbed as room noise.</span>
+      </li>
+      <li>
+        <b>Short, even in the heavy moments</b>
+        <span>A real reaction does not get wordier because the moment is big. It gets realer.</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ── limits and the allowlist ─────────────────────────────────────────── -->
+<section id="limits">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">What he can do to your Mac</p>
+      <h2 class="display d-64">A closed list. <span class="em">Nothing else, ever.</span></h2>
+      <p class="lede">This is the whole list. It is enforced in code rather than asked for in
+        a prompt, and there is a test that fails if anybody tries to add to it.</p>
+    </div>
+
+    <div class="chips reveal">
+      <span class="chip">focus.on</span>
+      <span class="chip">focus.off</span>
+      <span class="chip">app.open</span>
+      <span class="chip ask">app.quit</span>
+      <span class="chip">url.open</span>
+      <span class="chip">music.play</span>
+      <span class="chip">music.pause</span>
+      <span class="chip ask">shortcut.run</span>
+      <span class="chip never">send a message</span>
+      <span class="chip never">send mail</span>
+      <span class="chip never">place a call</span>
+    </div>
+
+    <div class="pair">
+      <article class="card reveal">
+        <h4>Nothing on the list can contact a person</h4>
+        <p>He will remind you to text your mum. He will never text her. Chores get
+          automated. Relationships do not.</p>
+      </article>
+      <article class="card reveal">
+        <h4>Nothing runs until you say yes</h4>
+        <p>Screen watching is opt-in and visibly armed. Quitting an app and running
+          a Shortcut ask every time, because closing someone's unsaved work is not
+          undoable.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ── principles ───────────────────────────────────────────────────────── -->
+<section id="principles">
+  <div class="wrap">
+    <div class="card card-dark card-pad reveal" style="padding:clamp(28px,4vw,64px)">
+      <p class="eyebrow eyebrow-light">Product law</p>
+      <h2 class="display d-48" style="color:var(--on-dark);max-width:18ch">The six rules he is <span class="em">not allowed to break.</span></h2>
+      <ul class="laws" style="margin-top:var(--s6)">
+        <li><b>He speaks first, or he is nothing.</b><span>Something that waits to be opened is a tool, and there are enough of those.</span></li>
+        <li><b>Suggestions are read, never spoken at you.</b><span>Being talked at while you are working is the opposite of help.</span></li>
+        <li><b>Mornings lead with the day.</b><span>Your calendar first. Goals are a footnote, not a report card.</span></li>
+        <li><b>Chores get automated. Relationships never do.</b><span>He reminds you to text your mum. He never texts her.</span></li>
+        <li><b>Nothing runs on your machine until you say yes.</b><span>Every permission is tied to one job he cannot do without it.</span></li>
+        <li><b>Say only what is needed.</b><span>A line or two beats a paragraph. He never pads and he never repeats you back to yourself.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ── faq ──────────────────────────────────────────────────────────────── -->
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">Straight answers</p>
+      <h2 class="display d-64">Before you ask.</h2>
+    </div>
+
+    <div class="faq reveal">
+      <details open>
+        <summary>Can I use it today?</summary>
+        <p>No. Greeno is pre-release and there is no public build yet. Early access
+          goes out in small batches to people who are willing to actually talk to
+          him for a week and tell us where he was wrong.</p>
+      </details>
+      <details>
+        <summary>Is he watching my screen?</summary>
+        <p>Only if you turn that on, and it is visibly armed when it is running.
+          The stuck nudge takes a glance, decides almost every time to say
+          nothing, and cannot speak again for at least thirty minutes even when
+          it does have something.</p>
+      </details>
+      <details>
+        <summary>Can he message people for me?</summary>
+        <p>No, and that is a design decision rather than a gap. There is no send,
+          no message, no mail and no call anywhere on the list of things he is
+          able to do. A test fails if anyone adds one.</p>
+      </details>
+      <details>
+        <summary>What does he need from my Mac?</summary>
+        <p>The microphone, or nothing works at all. Accessibility, for the
+          double-Option shortcut. Screen Recording, only if you want the stuck
+          nudge. Automation, so he can start a focus, open an app or change the
+          music. Each one is asked for in the moment he needs it, tied to the job
+          it does.</p>
+      </details>
+      <details>
+        <summary>Is he going to nag me?</summary>
+        <p>There are three moments and there will not be a fourth. Two of them
+          you can move or switch off, and the third only ever renders quietly in
+          the notch and waits for you to open it.</p>
+      </details>
+      <details>
+        <summary>What happens to what I tell him?</summary>
+        <p>It goes into your notebook, in your own words, and you can edit or
+          delete any line of it. The notebook is the thing he reads before he
+          says anything, so editing it changes him.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ── closer ───────────────────────────────────────────────────────────── -->
+<section id="access" style="padding-bottom:var(--s9)">
+  <div class="wrap">
+    <div class="card card-dark closer reveal">
+      <h2 class="display d-64">Make every day feel <span class="em">a little less boring.</span></h2>
+      <p>Leave an address and we will bring you in with the next batch. Small
+        batches, because the point is to hear back from you.</p>
+      <form class="signup" id="signup">
+        <input type="email" name="email" placeholder="you@wherever.com" required aria-label="Your email address">
+        <button class="btn btn-primary btn-lg" type="submit">Get early access</button>
+      </form>
+      <p class="fine">Pre-release. No public build yet, and no date being promised.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <a class="mark" href="#top">
+      <span class="mark-badge"><img src="greeno.svg" alt="" width="30" height="36"></span>
+      <span class="mark-name">Greeno</span>
+    </a>
+    <span class="muted">The someone who runs your day.</span>
+    <nav>
+      <a href="#moments">The moments</a>
+      <a href="#limits">Limits</a>
+      <a href="#access">Early access</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Your notebook</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="notebook.css">
+</head>
+<body>
+  <div class="drag"></div>
+  <div class="shell">
+    <main class="nbk">
+      <header class="nbk-head">
+        <div>
+          <h1 class="nbk-h1">Your <em class="em">notebook</em></h1>
+          <p class="nbk-sub" id="sub">What Greeno knows about you.</p>
+        </div>
+        <div class="nbk-when" id="when"></div>
+      </header>
+
+      <nav class="nbk-tabs" id="tabs" role="tablist">
+        <button class="nbk-tab is-on" data-tab="routines" role="tab" type="button">
+          Routines <span class="nbk-tab-n" id="n-routines"></span>
+        </button>
+        <button class="nbk-tab" data-tab="habits" role="tab" type="button">
+          Habits <span class="nbk-tab-n" id="n-habits"></span>
+        </button>
+        <button class="nbk-tab" data-tab="focus" role="tab" type="button">
+          Focus <span class="nbk-tab-n" id="n-focus"></span>
+        </button>
+        <button class="nbk-tab" data-tab="setup" role="tab" type="button">Setup</button>
+      </nav>
+
+      <div class="nbk-body">
+        <section class="sec sec-setup" data-panel="setup" hidden>
+          <div class="sec-head"><span class="sec-tag">Setup</span><span class="sec-note">when he shows up, and what he is allowed to see</span></div>
+          <div class="setup-grid">
+            <label class="setup-row">
+              <span class="setup-label">My day starts at</span>
+              <input class="setup-input no-drag" id="startTime" type="time" step="300">
+              <span class="setup-hint">He greets you inside the 45 minutes after this.</span>
+            </label>
+            <label class="setup-row">
+              <span class="setup-label">Ask me how it went at</span>
+              <input class="setup-input no-drag" id="nightTime" type="time" step="300">
+              <span class="setup-hint">The night debrief, once a day from this time.</span>
+            </label>
+            <label class="setup-row setup-row-toggle">
+              <span class="setup-label">Let him watch my screen</span>
+              <input class="setup-toggle no-drag" id="screenWatch" type="checkbox">
+              <span class="setup-hint">Off by default. He looks every 90 seconds and may speak at most once every 30 minutes.</span>
+            </label>
+          </div>
+          <div class="setup-saved" id="saved" hidden>Saved.</div>
+        </section>
+
+        <section class="sec" data-sec="routines" data-panel="routines">
+          <div class="sec-head"><span class="sec-tag">Routines</span><span class="sec-note">the shape your day already has</span></div>
+          <div class="rows" id="rows-routines"></div>
+        </section>
+
+        <section class="sec" data-sec="habits" data-panel="habits" hidden>
+          <div class="sec-head"><span class="sec-tag">Habits</span><span class="sec-note">what he holds you to</span></div>
+          <div class="rows" id="rows-habits"></div>
+        </section>
+
+        <section class="sec" data-sec="focus" data-panel="focus" hidden>
+          <div class="sec-head"><span class="sec-tag">Focus</span><span class="sec-note">when your head is clear, and what breaks it</span></div>
+          <div class="rows" id="rows-focus"></div>
+        </section>
+
+        <div class="nbk-foot">
+          <button class="btn btn-quiet no-drag" id="redo" type="button">Do the yap again</button>
+          <button class="btn btn-primary no-drag" id="close" type="button">Close</button>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="notebook.js"></script>
+</body>
+</html>

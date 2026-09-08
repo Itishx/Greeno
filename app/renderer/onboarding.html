@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Greeno</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="onboarding.css">
+</head>
+<body>
+  <div class="drag"></div>
+
+  <div class="shell">
+    <main class="ob">
+      <!-- Braino asks. -->
+      <section class="ob-ask">
+        <header class="ob-mark">
+          <div class="ob-mark-badge" id="rail-face">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <path d="M 50 16 C 62 16 70 23 70 37 C 70 51 63 59 50 59 C 37 59 30 51 30 37 C 30 23 38 16 50 16 Z"
+                    transform="translate(0 12) scale(1.18) translate(-8 -12)" fill="#8ecb6a"/>
+              <path id="rail-brow-l" d="M 34 44 Q 41 40 48 43" fill="none" stroke="#1b2a16" stroke-width="3" stroke-linecap="round"/>
+              <path id="rail-brow-r" d="M 74 44 Q 67 40 60 43" fill="none" stroke="#1b2a16" stroke-width="3" stroke-linecap="round"/>
+              <ellipse id="rail-eye-l" cx="41" cy="54" rx="3.4" ry="4" fill="#1b2a16"/>
+              <ellipse id="rail-eye-r" cx="67" cy="54" rx="3.4" ry="4" fill="#1b2a16"/>
+              <path id="rail-mouth-idle" d="M 47 64 Q 54 68 61 64" fill="none" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/>
+              <path id="rail-mouth-listen" d="M 48 65 Q 54 67 60 65" fill="none" stroke="#ffa946" stroke-width="2.8" stroke-linecap="round" style="display:none"/>
+              <ellipse id="rail-mouth-talk" cx="54" cy="65" rx="4.6" ry="3" fill="#1b2a16" style="display:none"/>
+            </svg>
+          </div>
+          <div>
+            <div class="ob-mark-name">Greeno</div>
+            <div class="ob-mark-sub" id="rail-sub">First day on the job</div>
+          </div>
+        </header>
+
+        <div class="ob-q">
+          <div class="ob-q-label" id="q-label">Getting started</div>
+          <h2 class="ob-q-text" id="q-text">One second.</h2>
+          <p class="ob-q-hint" id="q-hint"></p>
+          <div class="ob-heard" id="heard"></div>
+          <div class="ob-mic-row" id="mic-row" hidden>
+            <button class="ob-mic no-drag" id="mic" type="button" aria-label="Answer out loud">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/>
+                <path d="M5.5 11a6.5 6.5 0 0 0 13 0" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+                <path d="M12 17.5V21" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <div class="ob-answer-ways">
+              <div class="ob-mic-hint" id="mic-hint">Hit the mic and just talk.</div>
+              <button class="ob-type-toggle no-drag" id="type-toggle" type="button">or type it instead</button>
+            </div>
+          </div>
+
+          <div class="ob-typer" id="typer" hidden>
+            <textarea class="no-drag" id="type-box" rows="4" placeholder="Type your answer. Cmd + Enter when you are done."></textarea>
+            <div class="ob-typer-row">
+              <button class="ob-link no-drag" id="type-cancel" type="button">Cancel</button>
+              <button class="btn btn-primary no-drag" id="type-done" type="button">Done</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="ob-steps" id="steps"></div>
+          <div class="ob-rail-foot">
+            <button class="ob-link no-drag" id="back">← Back</button>
+            <button class="ob-link no-drag" id="help">Type instead</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- The notebook builds. -->
+      <section class="ob-book">
+        <header class="ob-book-head">
+          <div>
+            <h1 class="ob-book-title" id="book-title">Your notebook</h1>
+            <p class="ob-book-sub" id="book-sub">This fills in while you talk. Nothing is saved until you say so.</p>
+          </div>
+          <div class="ob-book-count" id="book-count"></div>
+        </header>
+
+        <div class="ob-book-scroll" id="book-scroll">
+          <section class="ob-sec" data-sec="routines">
+            <div class="ob-sec-head">
+              <span class="ob-sec-tag">Routines</span>
+              <span class="ob-sec-note">the shape your day already has</span>
+            </div>
+            <div class="ob-rows" id="rows-routines"></div>
+          </section>
+
+          <section class="ob-sec" data-sec="habits">
+            <div class="ob-sec-head">
+              <span class="ob-sec-tag">Habits</span>
+              <span class="ob-sec-note">what I will hold you to</span>
+            </div>
+            <div class="ob-rows" id="rows-habits"></div>
+          </section>
+
+          <section class="ob-sec" data-sec="focus">
+            <div class="ob-sec-head">
+              <span class="ob-sec-tag">Focus</span>
+              <span class="ob-sec-note">when your head is clear, and what breaks it</span>
+            </div>
+            <div class="ob-rows" id="rows-focus"></div>
+          </section>
+        </div>
+
+        <footer class="ob-book-foot">
+          <div class="ob-foot-note">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="5" y="10.5" width="14" height="9.5" rx="2.4" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M8.5 10.5V7.8a3.5 3.5 0 0 1 7 0v2.7" stroke="currentColor" stroke-width="1.7"/>
+            </svg>
+            <span id="foot-note">This stays on your Mac.</span>
+          </div>
+          <div class="ob-actions">
+            <button class="btn btn-quiet no-drag" id="skip" type="button">Skip</button>
+            <button class="btn btn-primary no-drag" id="next" type="button">Continue</button>
+          </div>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <script src="speech.js"></script>
+  <script src="onboarding.js"></script>
+</body>
+</html>

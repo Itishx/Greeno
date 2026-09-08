@@ -1,0 +1,56 @@
+{
+  "name": "greeno",
+  "productName": "Greeno",
+  "version": "0.1.0",
+  "description": "Braino Companion. The someone who runs your day.",
+  "main": "app/main.cjs",
+  "private": true,
+  "scripts": {
+    "build:engine": "node scripts/build-engine.mjs",
+    "start": "npm run mac:dev",
+    "test": "npm run build:engine && node --test tests/*.test.cjs",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "build:native": "node scripts/build-native.mjs",
+    "build": "npm run build:engine && npm run build:native",
+    "mac:dev": "npm run build && env -u ELECTRON_RUN_AS_NODE electron .",
+    "mac:debug": "npm run build && env -u ELECTRON_RUN_AS_NODE electron . --dev",
+    "web:api": "node server/index.cjs",
+    "web:ui": "vite",
+    "web": "concurrently -n api,ui -c green,magenta \"npm:web:api\" \"npm:web:ui\"",
+    "web:build": "vite build"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "concurrently": "^10.0.5",
+    "electron": "^33.2.0",
+    "esbuild": "^0.28.2",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.2.2"
+  },
+  "build": {
+    "appId": "com.creatish.greeno",
+    "productName": "Greeno",
+    "files": [
+      "app/**/*",
+      "!app/lib/emotional-engine/**/*.ts"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dir"
+      ],
+      "extendInfo": {
+        "LSUIElement": true,
+        "NSMicrophoneUsageDescription": "Braino listens when you talk to him.",
+        "NSScreenCaptureUsageDescription": "Braino looks at your screen to notice when you are stuck."
+      }
+    }
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  }
+}

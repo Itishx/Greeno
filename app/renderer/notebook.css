@@ -1,0 +1,149 @@
+/* The notebook. Deliberately a prop: he references it, it fills during the
+   debrief, and the user rarely opens it. It still has to be right. */
+
+* { box-sizing: border-box; }
+html, body {
+  height: 100%; margin: 0; background: var(--canvas); color: var(--ink);
+  font-family: var(--body); overflow: hidden;
+}
+.drag { position: fixed; inset: 0 0 auto 0; height: 36px; -webkit-app-region: drag; z-index: 5; }
+button, input, .no-drag { -webkit-app-region: no-drag; }
+
+.shell { height: 100%; padding: var(--s2); display: grid; }
+.nbk {
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  display: grid; grid-template-rows: auto 1fr; min-height: 0;
+}
+
+.nbk-head {
+  padding: var(--s5) var(--s5) var(--s3);
+  border-bottom: 1px solid var(--stone);
+  display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s3);
+}
+.nbk-h1 {
+  font-family: var(--display); font-weight: 400;
+  font-size: 48px; letter-spacing: -1.44px; line-height: 1.02; margin: 0;
+}
+.nbk-h1 .em { font-style: italic; }
+.nbk-sub { font-size: 14px; color: var(--fog); margin: 10px 0 0; line-height: 1.5; max-width: 56ch; }
+.nbk-when {
+  font-family: var(--body); font-weight: 600; font-size: 11px;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--fog); white-space: nowrap;
+}
+
+.nbk-body {
+  overflow-y: auto; min-height: 0;
+  padding: var(--s4) var(--s5) var(--s6);
+  display: grid; gap: var(--s3); align-content: start;
+}
+
+.sec { border: 1px solid var(--stone); border-radius: 20px; padding: var(--s3); }
+.sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: var(--s2); }
+.sec-tag {
+  font-family: var(--body); font-weight: 600; font-size: 11px;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--on-dark); background: var(--forest);
+  padding: 5px 10px; border-radius: var(--r-pill);
+}
+.sec-note { font-size: 12.5px; color: var(--fog); }
+
+.rows { display: grid; }
+.row {
+  display: grid; grid-template-columns: 1fr auto; gap: var(--s2); align-items: center;
+  padding: 13px 4px; border-bottom: 1px solid var(--stone);
+}
+.row:last-child { border-bottom: 0; }
+.row-title { font-size: 15px; font-weight: 500; }
+.row-why { font-size: 13px; color: var(--fog); margin-top: 4px; line-height: 1.45; }
+.row-meta { font-size: 13px; color: var(--fog); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* Habit bars. They fill live while he is still reacting, which is the moment
+   the debrief is built around. */
+.bar { margin-top: 9px; height: 6px; border-radius: var(--r-pill); background: var(--stone); overflow: hidden; }
+.bar-fill {
+  /* An <i> is inline, and width and height do nothing to an inline box. Without
+     this line the bar renders as an empty track forever, which reads to the user
+     as "you did nothing today". */
+  display: block;
+  height: 100%; width: 0; border-radius: var(--r-pill); background: var(--forest);
+  transition: width 900ms cubic-bezier(.22, 1, .36, 1);
+}
+.row.is-hit .bar-fill { background: var(--greeno); }
+.row.is-hit .row-title::after {
+  content: "✓"; color: var(--greeno-dark); font-size: 13px; margin-left: 8px; font-weight: 700;
+}
+@keyframes nbk-land { from { background: var(--lavender); } to { background: transparent; } }
+.row.is-fresh { animation: nbk-land 1.2s ease both; border-radius: 8px; }
+
+.empty { font-family: var(--display); font-size: 16px; font-style: italic; color: var(--fog); padding: 8px 4px; }
+
+.nbk-foot { display: flex; gap: 10px; justify-content: flex-end; padding-top: var(--s1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .bar-fill { transition: none; }
+  .row.is-fresh { animation: none; }
+}
+
+/* ── setup ────────────────────────────────────────────────────────────────
+   The only genuinely editable part of the notebook, because these three are
+   the ones that change what he DOES: when he shows up, and whether he may
+   look at the screen at all. Everything else he wrote from what you told him,
+   and the way to change that is to talk to him again. */
+.sec-setup { border-color: var(--stone); }
+.setup-grid { display: grid; gap: 18px; }
+.setup-row {
+  display: grid; grid-template-columns: 190px auto 1fr; gap: 14px; align-items: center;
+}
+.setup-label { font-size: 14px; font-weight: 500; }
+.setup-hint { font-size: 12.5px; color: var(--fog); line-height: 1.4; }
+.setup-input {
+  font-family: var(--body); font-size: 14px; font-weight: 500;
+  padding: 8px 12px; border-radius: var(--r-input);
+  border: var(--border); background: var(--surface); color: var(--ink);
+}
+.setup-toggle { width: 20px; height: 20px; accent-color: var(--forest); cursor: pointer; }
+.setup-row-toggle { grid-template-columns: 190px auto 1fr; }
+.setup-saved {
+  margin-top: 14px; font-size: 12.5px; color: var(--forest); font-weight: 600;
+}
+
+/* ── the three tabs ───────────────────────────────────────────────────────
+   The notebook is one thing seen three ways, and the tabs are the three the
+   whole product is named after. Setup rides along at the end because it is the
+   only part he did not write. */
+.nbk-tabs {
+  display: flex; gap: 4px; align-items: center;
+  padding: 0 var(--s5);
+  border-bottom: 1px solid var(--stone);
+  background: var(--surface);
+}
+.nbk-tab {
+  position: relative;
+  background: none; border: 0;
+  padding: 14px 16px 13px;
+  font: 600 14px/1 var(--body);
+  letter-spacing: -.01em;
+  color: var(--fog);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.nbk-tab:hover { color: var(--ink); }
+.nbk-tab.is-on { color: var(--ink); border-bottom-color: var(--forest); }
+.nbk-tab-n {
+  display: inline-block; margin-left: 6px;
+  font: 600 11px/1 var(--body);
+  color: var(--fog);
+  background: var(--stone);
+  padding: 3px 6px; border-radius: var(--r-pill);
+  min-width: 18px; text-align: center;
+}
+.nbk-tab.is-on .nbk-tab-n { color: var(--on-dark); background: var(--forest); }
+.nbk-tab-n:empty { display: none; }
+
+/* One panel at a time, so the tab bar is the only navigation. */
+.nbk-body > .sec[hidden] { display: none; }
+.nbk-body { grid-template-rows: 1fr; }

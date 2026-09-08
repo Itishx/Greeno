@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Greeno</title>
+  <link rel="stylesheet" href="notch.css">
+</head>
+<body>
+  <div id="stage">
+    <div id="walk-lane"></div>
+
+    <div class="nf" id="nf" data-state="idle">
+      <div class="nf-sonar"><i></i><i></i><i></i></div>
+
+      <!-- The boot. Ported from Braino's runNotchBoot: a spectrum perimeter
+           trace, the name resolving letter by letter, then the match cut where
+           the word collapses into his eyes. -->
+      <svg class="nf-shine" viewBox="0 0 190 55" aria-hidden="true">
+        <defs>
+          <linearGradient id="nf-shine-grad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#F4CF87" />
+            <stop offset="0.42" stop-color="#EC8078" />
+            <stop offset="0.7" stop-color="#8ECB6A" />
+            <stop offset="1" stop-color="#779CFF" />
+          </linearGradient>
+        </defs>
+        <path class="nf-shine-glow" pathLength="100" d="M 0 0 H 190 V 39 Q 190 55 174 55 H 16 Q 0 55 0 39 Z" stroke="url(#nf-shine-grad)" fill="none" />
+        <path class="nf-shine-core" pathLength="100" d="M 0 0 H 190 V 39 Q 190 55 174 55 H 16 Q 0 55 0 39 Z" stroke="url(#nf-shine-grad)" fill="none" />
+      </svg>
+
+      <div class="nf-boot-name" aria-hidden="true">
+        <span>G</span><span>R</span><span>E</span><span>E</span><span>N</span><span>O</span>
+      </div>
+
+      <div class="nf-boot-eyes" aria-hidden="true"><i></i><i></i></div>
+
+      <div class="nf-boot-card" aria-hidden="true">
+        <div class="nf-boot-greeting">
+          <strong><span>Hi,</span><span>I am</span><span>Greeno.</span></strong>
+          <small>I am here to hold you accountable.</small>
+        </div>
+        <i class="nf-boot-divider"></i>
+        <div class="nf-boot-guide">
+          <div class="nf-boot-guide-eyes"><i></i><i></i></div>
+          <small>Wake me</small>
+          <div><kbd>Control</kbd><kbd>Control</kbd></div>
+          <div><kbd>Option</kbd><kbd>Option</kbd><em>also works</em></div>
+        </div>
+      </div>
+
+      <!-- the resting face -->
+      <div class="nf-core" id="nf-core">
+        <svg class="nf-mini" viewBox="0 0 120 56" aria-label="Greeno">
+          <!-- Only the top 40 units of this viewBox clear the camera housing, so
+               everything that must be seen at rest lives above y=38. His brows
+               and eyes carry the whole face; the mouth only comes out once the
+               island is tall enough to hold it. -->
+          <g id="nf-brows">
+            <path d="M 32 13 Q 42 6.5 52 12" fill="none" stroke="#e8efe2" stroke-width="3.4" stroke-linecap="round"/>
+            <path d="M 88 13 Q 78 6.5 68 12" fill="none" stroke="#e8efe2" stroke-width="3.4" stroke-linecap="round"/>
+          </g>
+          <g id="nf-eye-l" class="nf-eye">
+            <ellipse cx="42" cy="26" rx="8" ry="9" fill="#f4f7f2"/>
+            <circle id="nf-pupil-l" cx="43" cy="26.4" r="4" fill="#12200e"/>
+            <circle cx="44.8" cy="23.4" r="1.6" fill="#fff"/>
+          </g>
+          <g id="nf-eye-r" class="nf-eye">
+            <ellipse cx="78" cy="26" rx="8" ry="9" fill="#f4f7f2"/>
+            <circle id="nf-pupil-r" cx="79" cy="26.4" r="4" fill="#12200e"/>
+            <circle cx="80.8" cy="23.4" r="1.6" fill="#fff"/>
+          </g>
+          <path class="nf-lid" d="M 34 24 Q 42 31 50 24" fill="none" stroke="#8ecb6a" stroke-width="3" stroke-linecap="round"/>
+          <path class="nf-lid" d="M 70 24 Q 78 31 86 24" fill="none" stroke="#8ecb6a" stroke-width="3" stroke-linecap="round"/>
+          <path id="nf-mouth-idle" d="M 50 43 Q 60 49 70 43" fill="none" stroke="#e8efe2" stroke-width="3" stroke-linecap="round"/>
+          <path id="nf-mouth-listen" d="M 52 44 Q 60 47 68 44" fill="none" stroke="#8ecb6a" stroke-width="3" stroke-linecap="round" style="display:none"/>
+          <ellipse id="nf-mouth-talk" cx="60" cy="44" rx="5" ry="3.4" fill="#8ecb6a" style="display:none"/>
+        </svg>
+      </div>
+
+      <!-- "Braino has a suggestion", collapsed -->
+      <div class="nf-tease" id="nf-tease">
+        <span class="nf-tease-left">
+          <i class="nf-tease-dot"></i>
+          <span class="nf-tease-text" id="nf-tease-text">Greeno has a suggestion</span>
+        </span>
+        <span class="nf-tease-arrow">→</span>
+      </div>
+
+      <!-- recording -->
+      <div class="nf-surface" id="nf-rec-surface">
+        <div class="nf-rec">
+          <i class="nf-rec-dot"></i>
+          <span class="nf-rec-label" id="nf-rec-time">00:00</span>
+          <span class="nf-rec-meta" id="nf-rec-meta">Listening</span>
+          <button class="nf-btn" id="nf-rec-stop" type="button">Stop</button>
+        </div>
+      </div>
+
+      <!-- the greet, the debrief, and any answer he gives -->
+      <div class="nf-surface nf-greeting" id="nf-say-surface">
+        <div class="nf-label" id="nf-say-label">Good morning</div>
+        <div class="nf-surface-body" id="nf-say-body"><div class="nf-body nf-short-text" id="nf-say-text"></div></div>
+        <div class="nf-actions" id="nf-say-actions"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="walker-svg.js"></script>
+  <script src="walker.js"></script>
+  <script src="speech.js"></script>
+  <script src="realtime.js"></script>
+  <script src="notch.js"></script>
+</body>
+</html>
