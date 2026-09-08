@@ -19,7 +19,7 @@
     "web:ui": "vite",
     "web": "concurrently -n api,ui -c green,magenta \"npm:web:api\" \"npm:web:ui\"",
     "web:build": "vite build",
-    "vercel-build": "npm run web:build"
+    "vercel-build": "npm run build:engine && npm run web:build"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
