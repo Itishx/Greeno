@@ -1,12 +1,53 @@
 import React from "react";
 // Everything the pages need that is not a component.
 
+// ── talking to the server ──────────────────────────────────────────────────
+//
+// The server may or may not have a place to keep your notebook. Locally it has a
+// JSON file; on Vercel it has nothing durable at all. So this browser is the
+// durable copy, and the rule is simple and self-configuring:
+//
+//   send the document if we have one, and keep whatever comes back.
+//
+// Locally the server never returns a document, so we never save one and never
+// send one, and the file on disk stays the single source of truth. Deployed, the
+// server always returns one, so we keep it and hand it back next time. Neither
+// side needs to be told which mode it is in.
+const STORE_KEY = "greeno-store-v1";
+
+function readStore() {
+  try {
+    const raw = window.localStorage.getItem(STORE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function writeStore(doc) {
+  try { window.localStorage.setItem(STORE_KEY, JSON.stringify(doc)); } catch { /* private window */ }
+}
+
+export function clearStore() {
+  try { window.localStorage.removeItem(STORE_KEY); } catch {}
+}
+
+export function hasLocalStore() { return Boolean(readStore()); }
+
 export async function api(path, body) {
-  const res = await fetch(`/api/${path}`, body
-    ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }
-    : undefined);
+  const doc = readStore();
+  const payload = { ...(body || {}) };
+  if (doc) payload.store = doc;
+
+  const res = await fetch(`/api/${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
   const json = await res.json().catch(() => ({ ok: false, error: `HTTP ${res.status}` }));
   if (!json.ok) throw new Error(json.error || "that did not go through");
+
+  // Only present when the server had nowhere to persist. Keeping it is what
+  // makes a notebook survive a refresh on a serverless host.
+  if (json.store) writeStore(json.store);
   return json.data;
 }
 

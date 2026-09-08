@@ -29,6 +29,24 @@ function init(userDataDir) {
   return FILE;
 }
 
+/**
+ * Load a whole store document straight into memory, with no file behind it.
+ *
+ * This is what lets the same modules run on a serverless host. Vercel's
+ * filesystem is ephemeral, so there is nowhere to write; instead the browser
+ * keeps the document and sends it with each request, the request hydrates it
+ * here, and every caller below carries on exactly as it does on the Mac.
+ *
+ * Nothing else in this file needed to change, which is the point: greet.cjs,
+ * debrief.cjs, turn.cjs, nudge.cjs and memory.cjs are all already tested
+ * against this interface and none of them can tell the difference.
+ */
+function hydrate(doc) {
+  FILE = null;                       // no file, so flush() becomes a no-op
+  cache = { ...empty(), ...(doc || {}) };
+  return cache;
+}
+
 function read() {
   try {
     const raw = fs.readFileSync(FILE, "utf8");
@@ -40,6 +58,9 @@ function read() {
 }
 
 function flush() {
+  // Hydrated (serverless) mode has nowhere to write. The caller returns
+  // store.all() to the browser instead, which is the durable copy.
+  if (!FILE) return;
   const tmp = `${FILE}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(cache, null, 2), "utf8");
   fs.renameSync(tmp, FILE);
@@ -212,7 +233,7 @@ function all() { return cache; }
 function reset() { cache = empty(); flush(); }
 
 module.exports = {
-  init, all, reset,
+  init, hydrate, all, reset,
   getNotebook, saveNotebook, isApproved,
   upsertCheckin, checkinsSince, checkinsForDay, streakFor,
   logShowup, lastShowup, lastShowups, markShowupActed, didToday, daysSinceLastDebrief,

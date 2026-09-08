@@ -25,7 +25,33 @@
   --nf-expo: 1050ms cubic-bezier(.22, 1, .36, 1);
   --nf-answer-in: 420ms;
   --nf-answer-out: 280ms;
-  --nf-coral: #e8786e;
+
+  /* ── his colour ──────────────────────────────────────────────────────────
+   * In Braino's notch the accent is coral, because coral IS Braino. The rule
+   * was never "use coral", it is "the accent is the character". Greeno's is
+   * green, and the notch face is already drawn in it (#8ecb6a, the same
+   * --greeno-light the mascot uses), which is why the face read green while
+   * the glow was still coral. That was a half-finished port, not a decision.
+   *
+   * ONE LINE SWITCHES IT BACK. Set these two to #e8786e / 232, 120, 110 and
+   * every glow, ring, mouth and dot in this file returns to Braino coral.
+   */
+  --nf-accent: #8ecb6a;
+  --nf-accent-rgb: 142, 203, 106;
+  --nf-coral: var(--nf-accent);        /* anything still saying coral resolves */
+
+  /* Amber never appears alone. It exists to warm the TOP of a breath, in
+     nfIslandBreath, nfThinkBreath and nfGreetGlow, and nowhere else. */
+  --nf-amber-rgb: 243, 154, 66;
+
+  /* An rgb triple, so a mode boot can recolour the auth pulse without anyone
+     having to touch the keyframes. */
+  --nf-boot-color: var(--nf-accent-rgb);
+
+  /* Every measured height is clamped against this, so a long answer can never
+     run off the bottom of the screen. The clamp is not optional. */
+  --nf-screen-h: 100vh;
+  --nf-notch-w: 190px;
 }
 
 html, body {
@@ -85,6 +111,47 @@ html, body {
   box-shadow: inset 1px 1px 1px rgba(255, 255, 255, .2);
 }
 
+/* ── the three motion families ────────────────────────────────────────────
+ * The pill springs on the Dynamic Island curve. Two groups deliberately break
+ * out of it, and both breaks are load-bearing.
+ *
+ * READING SURFACES (thinking, record, greeting) open on the 1050ms expo, like
+ * an object with mass. They are big and they are opening once.
+ *
+ * AN ANSWER IS A REPLY, AND A REPLY SHOULD LAND. A spoken line can be shorter
+ * than a 1050ms shell transition, so on the slow curve the next sentence
+ * starts arriving while the sheet is still resizing for the last one and each
+ * line renders inside the wrong geometry. 420/280 keeps the same easing family
+ * and lets height catch the measured copy in time.
+ *
+ * HEIGHT IS FASTER THAN WIDTH (280 against 420) because depth is what the next
+ * line needs, so it settles first. It also reads as dropping rather than
+ * unfolding, which is the correct verb for an answer coming out of a notch.
+ */
+.nf[data-state="short"],
+.nf[data-state="long"],
+.nf[data-state="input"],
+.nf[data-state="menu"] {
+  transition:
+    width 420ms cubic-bezier(.22, 1, .36, 1),
+    height 280ms cubic-bezier(.22, 1, .36, 1),
+    border-radius 360ms cubic-bezier(.22, 1, .36, 1),
+    background 180ms ease,
+    box-shadow 240ms ease,
+    filter .16s ease;
+}
+.nf[data-state="thinking"],
+.nf[data-state="record"],
+.nf[data-state="greeting"] {
+  transition:
+    width var(--nf-expo),
+    height var(--nf-expo),
+    border-radius 950ms cubic-bezier(.22, 1, .36, 1),
+    background 700ms ease,
+    box-shadow 850ms ease,
+    filter .16s ease;
+}
+
 /* Geometry per state. This table is the state machine's whole output. */
 .nf[data-state="idle"]      { width: 190px; height: calc(var(--nf-notch-h) + 22px); }
 .nf[data-state="idle"]:hover{ width: 198px; height: calc(var(--nf-notch-h) + 25px); }
@@ -93,10 +160,16 @@ html, body {
 .nf[data-state="working"]   { width: 250px; height: calc(var(--nf-notch-h) + 30px); border-radius: 0 0 20px 20px; }
 .nf[data-state="input"],
 .nf[data-state="menu"],
-.nf[data-state="short"]     { width: 480px; height: calc(var(--nf-notch-h) + var(--nf-answer-short-height, 146px)); border-radius: 0 0 28px 28px; }
+.nf[data-state="short"]     { width: 480px;
+  height: min(calc(var(--nf-notch-h) + var(--nf-answer-short-height, 146px)),
+              calc(var(--nf-screen-h) - 90px));
+  border-radius: 0 0 34px 34px; }
 .nf[data-state="thinking"],
 .nf[data-state="record"]    { width: 580px; height: calc(var(--nf-notch-h) + 70px); border-radius: 0 0 28px 28px; }
-.nf[data-state="long"]      { width: 580px; height: calc(var(--nf-notch-h) + var(--nf-answer-long-height, 240px)); border-radius: 0 0 28px 28px; }
+.nf[data-state="long"]      { width: 580px;
+  height: min(calc(var(--nf-notch-h) + var(--nf-answer-long-height, 240px)),
+              calc(var(--nf-screen-h) - 90px));
+  border-radius: 0 0 38px 38px; }
 .nf[data-state="greeting"]  { width: 610px; height: 180px; border-radius: 0 0 30px 30px; }
 .nf[data-state="signin"]    { width: 430px; height: calc(var(--nf-notch-h) + 55px); border-radius: 0 0 24px 24px; }
 
@@ -111,9 +184,78 @@ html, body {
   animation: nfShineDraw .62s cubic-bezier(.3, .5, .3, 1) forwards;
 }
 
-/* Coral is never a fill. It is his glow, his mouth, the sonar ring, the dot. */
-.nf[data-state="speaking"] { box-shadow: 0 0 34px rgba(232, 120, 110, .5); }
-.nf[data-state="listening"] { box-shadow: 0 0 26px rgba(232, 120, 110, .32); }
+/* THE ACCENT IS NEVER A FILL. It is his glow, his mouth, the sonar ring and
+   the thinking dot. The moment it becomes a background the notch stops being a
+   hole in the screen and starts being a green rectangle stuck to the top of a
+   monitor. No state class may ever tint .nf. */
+
+/* He is hearing you. This is the one unambiguous signal and it never goes
+   quiet while the mic is live.
+
+   TWO SHADOWS, ALWAYS. The first is a hairline ring that tightens the edge,
+   the second is the bloom. Animating only the bloom makes it look like a lamp
+   sitting behind the notch rather than the notch itself being lit.
+
+   1.9s is the same rhythm as the wake-up sequence, so listening feels like the
+   same creature that just woke, and it is far enough from the 3.8s ambient
+   breath to be told apart without looking directly at it. */
+.nf[data-state="listening"] { animation: nfListenRadiate 1.9s ease-in-out infinite; }
+@keyframes nfListenRadiate {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px    rgba(var(--nf-accent-rgb), .34),
+      0 0 18px 2px rgba(var(--nf-accent-rgb), .30);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1.6px  rgba(var(--nf-accent-rgb), .90),
+      0 0 38px 7px rgba(var(--nf-accent-rgb), .62);
+  }
+}
+
+/* SPEAKING DOES NOT PULSE. The mouth already carries the state, and two things
+   moving at different rates on the same object reads as a glitch. The glow goes
+   on, holds, and goes off. */
+.nf[data-state="speaking"] { box-shadow: 0 0 34px rgba(var(--nf-accent-rgb), .5); }
+
+/* Working is the auth pulse, on the rgb triple so a mode boot can recolour it. */
+.nf[data-state="working"] { animation: nfAuthPulse 1.6s ease-in-out infinite; }
+@keyframes nfAuthPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(var(--nf-boot-color), .16); }
+  50%      { box-shadow: 0 0 24px rgba(var(--nf-boot-color), .44); }
+}
+
+/* Dictation is not a conversation. Hera gets a quieter, smaller listen: you are
+   dictating into another app, so the notch should be present without asking for
+   attention. Set .nf-dictation alongside data-state="listening" to get it.
+   (notch.js does not set this class yet.) */
+.nf.nf-dictation[data-state="listening"] {
+  width: 222px;
+  height: calc(var(--nf-notch-h) + 28px);
+  border-radius: 0 0 18px 18px;
+  animation: nfYapModeRadiate 2.4s ease-in-out infinite;
+}
+@keyframes nfYapModeRadiate {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(var(--nf-accent-rgb), .20), 0 0 12px rgba(var(--nf-accent-rgb), .18); }
+  50%      { box-shadow: 0 0 0 1.2px rgba(var(--nf-accent-rgb), .52), 0 0 26px rgba(var(--nf-accent-rgb), .38); }
+}
+
+/* A machine with no physical housing has nothing to be continuous with, so the
+   top corners round instead of staying square. Radii are the only thing that
+   changes. */
+.nf.no-notch { border-radius: 16px; }
+.nf.no-notch[data-state="listening"],
+.nf.no-notch[data-state="speaking"] { border-radius: 26px; }
+.nf.no-notch[data-state="short"],
+.nf.no-notch[data-state="input"],
+.nf.no-notch[data-state="menu"] { border-radius: 34px; }
+.nf.no-notch[data-state="long"] { border-radius: 38px; }
+.nf.no-notch[data-state="greeting"] { border-radius: 30px; }
+
+/* An error or a correction. Rides the fast filter transition on .nf, which is
+   why filter is 0.16s while everything else is 0.55s: a flash should land,
+   not swell. (notch.js does not set this class yet.) */
+.nf.nf-flash { filter: brightness(1.9); }
 
 /* ── the face ─────────────────────────────────────────────────────────────── */
 /* The face band. It starts BELOW the housing, which is the whole reason his
@@ -128,7 +270,29 @@ html, body {
 .nf[data-state="speaking"] .nf-mini { width: 96px; }
 
 .nf-lid { opacity: 0; transition: opacity .18s ease; }
-.nf.is-thinking .nf-lid { opacity: 1; }
+.nf.is-thinking .nf-lid,
+.nf[data-state="thinking"] .nf-lid { opacity: 1; }
+
+/* Blink. 0.12, NEVER 0: a pupil scaled to nothing disappears entirely and the
+   blink reads as a dropped frame rather than an eyelid. */
+.nf-eye { transform-box: fill-box; transform-origin: center; }
+.nf:not(.is-booting) .nf-eye { animation: nfBlink 4.6s ease-in-out infinite; }
+#nf-eye-r { animation-delay: 40ms; }   /* both lids do not land on the same ms */
+@keyframes nfBlink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  96%           { transform: scaleY(.12); }
+}
+
+/* Scanning, for when he is reading the screen rather than listening to you.
+   Deliberately uneven: 22, 48, 74, asymmetric distances, a touch of vertical.
+   Evenly spaced keyframes look like a metronome, and eyes do not scan on one. */
+.nf.is-scanning .nf-eye { animation: nfScanLook 3s ease-in-out infinite; }
+@keyframes nfScanLook {
+  0%, 100% { transform: translateX(0); }
+  22%      { transform: translateX(-3.4px); }
+  48%      { transform: translateX(3.2px) translateY(-1.4px); }
+  74%      { transform: translateX(-1.6px) translateY(1.2px); }
+}
 
 /* Idle is eyes only, in the dark.
  *
@@ -139,13 +303,53 @@ html, body {
  * grown to 44px of chin and there is room for it. */
 .nf:not([data-state="listening"]):not([data-state="speaking"]) #nf-mouth-idle { display: none; }
 
+/* THE THREE MOUTHS, and which one is out when.
+ *
+ * Two of these were in the markup with an inline display:none and nothing in
+ * the CSS ever turned them on, so he had a talking mouth that never moved. The
+ * inline style is why every rule here needs !important.
+ *
+ *   listening  the smile, and ONLY here. Never while thinking, never while
+ *              speaking, never at rest. It is the visual equivalent of nodding
+ *              along, so it belongs to the half of the turn where he is quiet.
+ *   speaking   the ellipse, scaling on Y.
+ *   otherwise  nothing, per the clip-edge rule above.
+ */
+.nf[data-state="listening"] #nf-mouth-idle { display: none !important; }
+.nf[data-state="listening"] #nf-mouth-listen { display: block !important; }
+
+/* The mouth follows PLAYBACK, never the reply string. speech.js adds and
+   removes data-state="speaking" from the audio element's own play and ended
+   events, which is the only way the mouth and the voice stay in step.
+   NOTE there are TWO mouths on two bodies: this one and the mascot's
+   __sbwk_talk__. Both have to be cleared when speech is interrupted, or he
+   flaps in silence. Forgetting one is the most common way this breaks. */
+.nf[data-state="speaking"] #nf-mouth-idle { display: none !important; }
+.nf[data-state="speaking"] #nf-mouth-talk {
+  display: block !important;
+  transform-box: fill-box;      /* required, or the ellipse scales about the
+                                   viewBox origin and slides off his face */
+  transform-origin: center;
+  animation: nfTalk .28s ease-in-out infinite;
+}
+/* 0.28s is the whole trick: fast enough to read as speech, slow enough not to
+   buzz. It overshoots to 1.25 rather than stopping at 1, because a mouth that
+   only ever shrinks looks like it is closing, not talking. */
+@keyframes nfTalk {
+  0%, 100% { transform: scaleY(.45); }
+  50%      { transform: scaleY(1.25); }
+}
+
 /* ── the ink ladder ───────────────────────────────────────────────────────── */
 .nf-label {
-  font: 600 9px/1 "Figtree", system-ui; letter-spacing: .12em; text-transform: uppercase;
+  font: 650 9px/1 "Figtree", system-ui; letter-spacing: .14em; text-transform: uppercase;
   color: rgba(255, 255, 255, .6);
 }
-.nf-body  { font: 400 17px/1.48 "Figtree", system-ui; color: rgba(255, 255, 255, .68); }
-.nf-short { font: 400 17px/1.38 "Figtree", system-ui; color: #f7f7f5; }
+.nf-body  { font: 500 17px/1.48 "Figtree", system-ui; color: rgba(255, 255, 255, .68); }
+.nf-short { font: 500 17px/1.38 "Figtree", system-ui; color: #f7f7f5; }
+/* Body and short are the same size and differ only in leading and brightness.
+   Short answers are brighter and tighter because they are glanced at. Long ones
+   are dimmer and airier because they are read. */
 
 /* ── the karaoke ladder ───────────────────────────────────────────────────
    Ported from braino-mac.css. Unspoken words sit at .28, spoken land at .84,
@@ -199,19 +403,24 @@ html, body {
 .nf-tease-text { font: 500 13.5px/1 "Figtree", system-ui; color: #f7f7f5; }
 /* The thinking dot is coral, and it is a stroke of his attention, not a fill. */
 .nf-tease-dot {
-  width: 7px; height: 7px; border-radius: 50%; background: var(--nf-coral);
+  width: 7px; height: 7px; border-radius: 50%; background: var(--nf-accent);
   margin-right: 9px; flex: 0 0 7px;
-  animation: nfPulse 1.7s ease-in-out infinite;
+  animation: nfThinkDot 1.7s ease-in-out infinite;
 }
 .nf-tease-left { display: flex; align-items: center; }
 .nf-tease-arrow { color: rgba(255, 255, 255, .5); font-size: 15px; }
 
-@keyframes nfPulse { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
 
 /* ── recording pill ───────────────────────────────────────────────────────── */
 .nf-rec { display: flex; align-items: center; gap: 10px; justify-content: center;
           position: absolute; inset: var(--nf-notch-h) 0 0 0; }
-.nf-rec-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff5c5c; animation: nfPulse 1.1s ease-in-out infinite; }
+.nf-rec-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff5c5c;
+               animation: nfMeetingPulse 1.7s ease-in-out infinite; }
+/* It shrinks as it dims. Opacity alone reads as a rendering artifact. */
+@keyframes nfMeetingPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .35; transform: scale(.78); }
+}
 .nf-rec-label { font: 700 11px/1 "Figtree", system-ui; color: #ff6b6b; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
 .nf-rec-meta { font: 400 12px/1 "Figtree", system-ui; color: rgba(255, 255, 255, .6); }
 
@@ -220,20 +429,113 @@ html, body {
 .nf[data-state="listening"] .nf-sonar { display: block; }
 .nf-sonar i {
   position: absolute; left: 50%; top: 50%;
-  width: 40px; height: 40px; margin: -20px 0 0 -20px;
-  border-radius: 50%; border: 1px solid rgba(232, 120, 110, .5);
+  width: 120px; height: 44px; margin: -22px 0 0 -60px;
+  border-radius: 50%;
+  border: 2px solid rgba(var(--nf-accent-rgb), .5);
   animation: nfSonar 2.4s ease-out infinite;
 }
 .nf-sonar i:nth-child(2) { animation-delay: .8s; }
 .nf-sonar i:nth-child(3) { animation-delay: 1.6s; }
+
+/* Rings leaving the pill, not a circle being scaled up.
+   THE BORDER THINS AS IT EXPANDS, so the ring dissolves rather than just
+   fading out, and the box is wider than it is tall so what leaves a wide pill
+   still reads as having come from it. Animating width and height (rather than
+   transform: scale) is what keeps the border weight independent of the size,
+   which is the entire effect. */
 @keyframes nfSonar {
-  from { transform: scale(.6); opacity: .7; }
-  to   { transform: scale(3.4); opacity: 0; }
+  0%   { width: 120px; height: 44px;  margin: -22px 0 0 -60px;  opacity: .6; border-width: 2px; }
+  100% { width: 340px; height: 150px; margin: -75px 0 0 -170px; opacity: 0;   border-width: .5px; }
+}
+
+/* Hera's rings: smaller, slower, and dimmer at .28 against .6. */
+.nf.nf-dictation[data-state="listening"] .nf-sonar i { animation-name: nfYapSonar; }
+@keyframes nfYapSonar {
+  0%   { width: 110px; height: 30px; margin: -15px 0 0 -55px;  opacity: .28; border-width: 1.5px; }
+  100% { width: 238px; height: 76px; margin: -38px 0 0 -119px; opacity: 0;   border-width: .5px; }
+}
+
+/* ── thinking ─────────────────────────────────────────────────────────────
+   Between hearing and answering. Three parts, and the warmth is the point:
+   thinking is the only place in the notch where two accents mix, which is what
+   makes it feel warmer than listening rather than just busier. */
+
+.nf[data-state="thinking"] { animation: nfThinkBreath 2.6s ease-in-out infinite; }
+@keyframes nfThinkBreath {
+  0%, 100% { box-shadow: 0 0 14px rgba(var(--nf-accent-rgb), .18), 0 0 30px rgba(var(--nf-accent-rgb), .08); }
+  50%      { box-shadow: 0 0 26px rgba(var(--nf-accent-rgb), .38), 0 0 52px rgba(var(--nf-amber-rgb), .16); }
+}
+
+/* The dot LIFTS 2px as it brightens. Rising, not just blinking, which is the
+   difference between a thing considering something and a thing waiting. */
+@keyframes nfThinkDot {
+  0%, 100% { opacity: .3; transform: translateY(0); }
+  50%      { opacity: 1;  transform: translateY(-2px); }
+}
+
+/* A light band sweeping right to left across the label. It travels past both
+   edges (180% to -80%) so there is no visible start or stop.
+
+   This hangs off .nf-label rather than a dedicated element because notch.js
+   reuses nf-say-surface for thinking and writes "Thinking" into the label, so
+   there is nothing else to attach it to and nothing that needs adding. */
+.nf[data-state="thinking"] .nf-label {
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, .38) 0%,
+    rgba(255, 255, 255, .92) 18%,
+    rgba(255, 255, 255, .38) 36%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+  animation: nfThinkShimmer 2s linear infinite;
+}
+@keyframes nfThinkShimmer {
+  from { background-position: 180% 0; }
+  to   { background-position: -80% 0; }
+}
+
+/* ── the greeting, and the handoff to ambient ─────────────────────────────
+   The morning drop, and the biggest single move the notch makes.
+
+   THE PEAK IS AT 30%, NOT 50%. It flares early and settles slowly, which is
+   the shape of something arriving. A symmetric glow reads as a notification,
+   and he is not a notification.
+
+   It settles exactly onto the nfIslandBreath resting values, so the greeting
+   hands off to the ambient breath with no visible seam. */
+.nf[data-state="greeting"],
+.nf.is-greeting {
+  animation: nfGreetGlow 1.4s ease-out both,
+             nfIslandBreath 3.8s ease-in-out 1.4s infinite;
+}
+@keyframes nfGreetGlow {
+  0%   { box-shadow: 0 0 0 rgba(var(--nf-accent-rgb), 0); }
+  30%  { box-shadow: 0 0 34px rgba(var(--nf-accent-rgb), .85), 0 0 60px rgba(var(--nf-amber-rgb), .4); }
+  100% { box-shadow: 0 0 12px rgba(var(--nf-accent-rgb), .16), 0 0 26px rgba(var(--nf-accent-rgb), .07); }
+}
+
+/* Ambient breathing. 3.8s, roughly a resting breath, and deliberately far from
+   the 1.9s of listening so the two rhythms can be told apart without looking
+   directly at them.
+
+   TRUE IDLE GETS NONE OF THIS. data-state="idle" is pure black at exactly
+   notch width, merged with the housing, with only his eyes floating in it. */
+@keyframes nfIslandBreath {
+  0%, 100% { box-shadow: 0 0 12px rgba(var(--nf-accent-rgb), .16), 0 0 26px rgba(var(--nf-accent-rgb), .07); }
+  50%      { box-shadow: 0 0 22px rgba(var(--nf-accent-rgb), .34), 0 0 46px rgba(var(--nf-amber-rgb), .14); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .nf, .nf-surface { transition: none; }
-  .nf-sonar i, .nf-tease-dot, .nf-rec-dot { animation: none; }
+  .nf-sonar i, .nf-tease-dot, .nf-rec-dot, .nf-eye,
+  .nf[data-state="thinking"] .nf-label,
+  .nf[data-state="listening"], .nf[data-state="speaking"],
+  .nf[data-state="working"], .nf[data-state="thinking"],
+  .nf[data-state="greeting"], .nf.is-greeting,
+  .nf[data-state="speaking"] #nf-mouth-talk { animation: none; }
+  /* The states still need their light, just not their motion. */
+  .nf[data-state="listening"] { box-shadow: 0 0 0 1.2px rgba(var(--nf-accent-rgb), .6), 0 0 22px rgba(var(--nf-accent-rgb), .4); }
+  .nf[data-state="speaking"]  { box-shadow: 0 0 34px rgba(var(--nf-accent-rgb), .5); }
 }
 
 /* ── the boot ──────────────────────────────────────────────────────────────

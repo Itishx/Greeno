@@ -49,11 +49,26 @@
   }
 
   function setMouth(m) {
-    // "" rather than "block": the stylesheet still gets to hide it at rest,
-    // where there is no room to draw it.
-    $("nf-mouth-idle").style.display = m === "closed" ? "" : "none";
-    $("nf-mouth-listen").style.display = m === "listen" ? "" : "none";
-    $("nf-mouth-talk").style.display = m === "talk" ? "" : "none";
+    // Hiding is written as inline !important on purpose. The stylesheet now
+    // force-shows the listening mouth off data-state, and a plain inline style
+    // loses to a CSS !important: without this, his mouth stays open after you
+    // stop talking because the state is still "listening".
+    //
+    // Showing stays as "" so the stylesheet still gets to hide the idle mouth at
+    // rest, where the pill is too short to draw it without shearing it in half.
+    const set = (id, show) => {
+      const el = $(id);
+      if (show) el.style.removeProperty("display");
+      else el.style.setProperty("display", "none", "important");
+    };
+    set("nf-mouth-idle", m === "closed");
+    set("nf-mouth-listen", m === "listen");
+    set("nf-mouth-talk", m === "talk");
+
+    // A hook the stylesheet can hang the talking animation on. data-state is
+    // "short" or "long" while he speaks (those size the answer sheet), never
+    // "speaking", so a rule keyed to that state can never fire.
+    nf.classList.toggle("is-talking", m === "talk");
   }
 
   // ── his face follows the voice, not the text ─────────────────────────────
