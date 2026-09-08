@@ -61,8 +61,15 @@ app.use(express.json({ limit: "25mb" }));
 function withStore(req) {
   const sent = req.body && typeof req.body.store === "object" && req.body.store !== null;
   if (sent) { store.hydrate(req.body.store); return true; }
-  if (!LOCAL_DIR) store.hydrate({});     // serverless with no document yet
-  return false;
+
+  // Serverless with nothing sent yet: hydrate an empty document AND still
+  // return it. Keying this off whether the client sent something loses the very
+  // first save, which is the one that matters: a first-time visitor has no
+  // document, so the notebook they just built would come back with nowhere to
+  // live. Serverless always hands the document home.
+  if (!LOCAL_DIR) { store.hydrate({}); return true; }
+
+  return false;   // local: the file on disk is the durable copy
 }
 
 const route = (fn) => async (req, res) => {

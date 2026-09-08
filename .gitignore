@@ -7,3 +7,4 @@ app/lib/engine.cjs
 .DS_Store
 app/native/greeno-hotkey
 dist-web/
+.vercel

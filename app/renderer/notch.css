@@ -215,7 +215,21 @@ html, body {
 
 /* SPEAKING DOES NOT PULSE. The mouth already carries the state, and two things
    moving at different rates on the same object reads as a glitch. The glow goes
-   on, holds, and goes off. */
+   on, holds, and goes off.
+
+   KEYED TO .is-talking, NOT TO A STATE. notch.js never sets data-state
+   "speaking": while he talks the state is "short" or "long", because those are
+   what size the answer sheet, and switching to "speaking" would resize the
+   notch to 250px mid-sentence and clip the text he is reading out. So the glow
+   hangs off the class setMouth toggles instead. The data-state rule is kept
+   underneath as belt and braces for any future path that does use it.
+
+   Scoped to the two answer states on purpose: listening, thinking and the
+   greeting each own their own animated box-shadow, and an animation beats a
+   plain declaration, so an unscoped rule here would be silently ignored during
+   those and would fight them if it ever were not. */
+.nf.is-talking[data-state="short"],
+.nf.is-talking[data-state="long"],
 .nf[data-state="speaking"] { box-shadow: 0 0 34px rgba(var(--nf-accent-rgb), .5); }
 
 /* Working is the auth pulse, on the rgb triple so a mode boot can recolour it. */
@@ -303,30 +317,25 @@ html, body {
  * grown to 44px of chin and there is room for it. */
 .nf:not([data-state="listening"]):not([data-state="speaking"]) #nf-mouth-idle { display: none; }
 
-/* THE THREE MOUTHS, and which one is out when.
+/* THE THREE MOUTHS.
  *
- * Two of these were in the markup with an inline display:none and nothing in
- * the CSS ever turned them on, so he had a talking mouth that never moved. The
- * inline style is why every rule here needs !important.
+ * WHICH mouth is visible is notch.js's job, not this file's. setMouth() writes
+ * display inline on all three, and that is the right split: he opens and closes
+ * his mouth in response to audio, which is a runtime fact, not a style.
  *
- *   listening  the smile, and ONLY here. Never while thinking, never while
- *              speaking, never at rest. It is the visual equivalent of nodding
- *              along, so it belongs to the half of the turn where he is quiet.
- *   speaking   the ellipse, scaling on Y.
- *   otherwise  nothing, per the clip-edge rule above.
+ * This file owns only how the visible one MOVES. An earlier version of this
+ * section force-showed the mouths from CSS with display:block !important, which
+ * outranked setMouth's inline style and left his mouth hanging open after you
+ * stopped talking, because data-state is still "listening" when speech stops.
+ * Do not reintroduce a display rule here. The one exception is the clip-edge
+ * rule above, which is plain (no !important) precisely so setMouth still wins.
+ *
+ * NOTE there are TWO mouths on two bodies: this one and the mascot's
+ * __sbwk_talk__. Both have to be cleared when speech is interrupted, or he
+ * flaps in silence. Forgetting one is the most common way this breaks.
  */
-.nf[data-state="listening"] #nf-mouth-idle { display: none !important; }
-.nf[data-state="listening"] #nf-mouth-listen { display: block !important; }
-
-/* The mouth follows PLAYBACK, never the reply string. speech.js adds and
-   removes data-state="speaking" from the audio element's own play and ended
-   events, which is the only way the mouth and the voice stay in step.
-   NOTE there are TWO mouths on two bodies: this one and the mascot's
-   __sbwk_talk__. Both have to be cleared when speech is interrupted, or he
-   flaps in silence. Forgetting one is the most common way this breaks. */
-.nf[data-state="speaking"] #nf-mouth-idle { display: none !important; }
+.nf.is-talking #nf-mouth-talk,
 .nf[data-state="speaking"] #nf-mouth-talk {
-  display: block !important;
   transform-box: fill-box;      /* required, or the ellipse scales about the
                                    viewBox origin and slides off his face */
   transform-origin: center;
@@ -532,6 +541,7 @@ html, body {
   .nf[data-state="listening"], .nf[data-state="speaking"],
   .nf[data-state="working"], .nf[data-state="thinking"],
   .nf[data-state="greeting"], .nf.is-greeting,
+  .nf.is-talking #nf-mouth-talk,
   .nf[data-state="speaking"] #nf-mouth-talk { animation: none; }
   /* The states still need their light, just not their motion. */
   .nf[data-state="listening"] { box-shadow: 0 0 0 1.2px rgba(var(--nf-accent-rgb), .6), 0 0 22px rgba(var(--nf-accent-rgb), .4); }
