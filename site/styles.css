@@ -207,7 +207,15 @@ img, svg { max-width: 100%; }
 }
 .nav-links a:hover { background: var(--stone); }
 .nav-cta { margin-left: 6px; }
-@media (max-width: 900px) { .nav-links { display: none; } .nav-cta { margin-left: auto; } }
+.nav-deck { padding: 9px 15px; font-size: 14px; margin-left: 6px; }
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .nav-deck { margin-left: auto; }
+  .nav-cta { margin-left: 6px; }
+}
+/* Two buttons plus a wordmark do not fit a phone. The deck is still one tap
+   away in the hero and in the footer, so the nav copy is the one that goes. */
+@media (max-width: 560px) { .nav-deck { display: none; } }
 
 /* ── section scaffolding ──────────────────────────────────────────────────── */
 

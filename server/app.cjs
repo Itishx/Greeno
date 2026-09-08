@@ -72,14 +72,37 @@ function withStore(req) {
   return false;   // local: the file on disk is the durable copy
 }
 
+// One store-touching request at a time in this process.
+//
+// store.cjs keeps `cache` as a module global, and a warm serverless instance
+// serves invocations concurrently. Without this lock, visitor A hydrates their
+// document, awaits OpenAI for several seconds, and while it waits visitor B
+// hydrates over the same global. A then resumes writing into B's document and
+// sends B's notebook home in A's response, where A's browser saves it. That is
+// one person's habits landing in another person's browser.
+//
+// Serializing is the cheap fix: the alternative is threading AsyncLocalStorage
+// through twenty-five `cache.` references in a file that Electron, four library
+// modules and six test files all depend on.
+let queue = Promise.resolve();
+const serialize = (fn) => {
+  const run = queue.then(fn, fn);
+  queue = run.then(() => {}, () => {});   // a thrown handler must not wedge the queue
+  return run;
+};
+
 const route = (fn) => async (req, res) => {
   try {
-    const hydrated = withStore(req);
-    const data = await fn(req);
-    // In hydrated mode the browser is the durable copy, so every mutation has
-    // to travel home. Sending it back unconditionally means a handler can never
-    // forget to.
-    res.json({ ok: true, data, ...(hydrated ? { store: store.all() } : {}) });
+    // Hydrate, run, and capture the document as ONE atomic step. Capturing
+    // outside the lock would hand back whatever the next request had loaded.
+    const { data, doc } = await serialize(async () => {
+      const hydrated = withStore(req);
+      const out = await fn(req);
+      // Copied, not referenced: the cache is reassigned by the next hydrate and
+      // a live reference would be a second way to leak.
+      return { data: out, doc: hydrated ? JSON.parse(JSON.stringify(store.all())) : null };
+    });
+    res.json({ ok: true, data, ...(doc ? { store: doc } : {}) });
   } catch (err) {
     console.error("[greeno-web]", err.message);
     res.status(400).json({ ok: false, error: String(err.message || err) });
@@ -202,6 +225,10 @@ app.post("/api/turn", route((req) => turn(req.body)));
 app.post("/api/greet", route(() => morningGreet({})));
 app.post("/api/settings", route((req) => ({ settings: store.saveSettings(req.body.patch || {}) })));
 app.post("/api/reset", route(() => { store.reset(); return view(); }));
+
+// Everything he knows, as a file. For a design whose data lives in one browser,
+// this is the only backup that exists, so it must not quietly 404.
+app.post("/api/export", route(() => store.all()));
 
 // His voice. Streamed, so playback starts on the first chunk rather than the
 // last. Not wrapped in route(): the body is audio, not JSON.

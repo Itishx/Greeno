@@ -18,7 +18,7 @@
     "web:api": "node server/index.cjs",
     "web:ui": "vite",
     "web": "concurrently -n api,ui -c green,magenta \"npm:web:api\" \"npm:web:ui\"",
-    "web:build": "vite build",
+    "web:build": "vite build && node scripts/build-web.mjs",
     "vercel-build": "npm run build:engine && npm run web:build"
   },
   "devDependencies": {

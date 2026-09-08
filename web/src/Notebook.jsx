@@ -318,7 +318,16 @@ function Setup({ state, reload, flash }) {
 
       <div className="setup-row">
         <span className="setup-label">Your data</span>
-        <a className="btn" href="/api/export" download>Export everything</a>
+        <button className="btn" onClick={async () => {
+          // A POST, because the document lives in this browser and has to be
+          // sent up to come back. An <a download> could only ever fetch the
+          // server's copy, which on a serverless host does not exist.
+          const all = await api("export", {});
+          const url = URL.createObjectURL(new Blob([JSON.stringify(all, null, 2)], { type: "application/json" }));
+          const a = document.createElement("a");
+          a.href = url; a.download = "greeno.json"; a.click();
+          URL.revokeObjectURL(url);
+        }}>Export everything</button>
         <span className="setup-hint">Every habit, check-in and note, as one JSON file.</span>
       </div>
 
