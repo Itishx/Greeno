@@ -2,15 +2,22 @@ import React, { useEffect, useRef, useState } from "react";
 import { api, tz, speak, stopSpeech, createRecorder, emphasise } from "./lib.jsx";
 import Greeno from "./Greeno.jsx";
 
-// Which section each answer mostly feeds, so the panel lights up the part it is
-// about to fill while you are still answering.
-const SECTION = ["routines", "habits", "focus", "focus", "routines"];
-const STEPS = ["A normal day", "What slips", "Deep work", "What you listen to", "What you wish"];
+// His first day on the job.
+//
+// Three parts, in the order the notebook's sections appear, because an earlier
+// version asked five scattered questions written for a general companion and
+// left people unsure what kind of answer was wanted. Each question is short
+// enough to answer out loud; the detail lives in the helper line, and one whole
+// example sentence shows HOW MUCH to say.
 
 export default function Onboarding({ state, onDone, onQuit }) {
-  const [qi, setQi] = useState(0);
-  const [phase, setPhase] = useState("ask");      // ask | readback | done
-  const [answers, setAnswers] = useState([]);
+  const parts = state.parts || [];
+  const steps = parts.flatMap((p) => p.steps.map((s) => ({ ...s, section: p.section, part: p })));
+
+  const [i, setI] = useState(0);
+  const [phase, setPhase] = useState("ask");        // ask | readback
+  const [answers, setAnswers] = useState({});
+  const [pomodoro, setPomodoro] = useState({ work: 25, break: 5 });
   const [book, setBook] = useState(null);
   const [heard, setHeard] = useState("");
   const [busy, setBusy] = useState("");
@@ -21,24 +28,28 @@ export default function Onboarding({ state, onDone, onQuit }) {
   const [fresh, setFresh] = useState(new Set());
   const rec = useRef(null);
   const mime = useRef("");
-  const lastSig = useRef(new Map());
+  const sigs = useRef(new Map());
 
-  const asked = state.askedDisplay || state.asked || [];
-  const spoken = state.asked || [];
+  const step = steps[i];
+  const partIndex = parts.findIndex((p) => p.section === step?.section);
+  // The intro is spoken once, when you arrive at a new part.
+  const firstOfPart = step && step.part.steps[0].id === step.id;
 
   useEffect(() => {
-    if (phase !== "ask") return;
-    setHeard(answers[qi] || "");
+    if (phase !== "ask" || !step) return;
+    setHeard(answers[step.id] || "");
     setTyping(false);
-    speak(spoken[qi]);
+    speak(firstOfPart ? `${step.part.intro} ${step.spoken}` : step.spoken);
     return stopSpeech;
-  }, [qi, phase]);
+  }, [i, phase]);
 
   useEffect(() => {
     if (phase !== "readback") return;
     speak("Here is what I got. Have a read. If it is right, hit looks right and I will start using it.");
     return stopSpeech;
   }, [phase]);
+
+  if (!step && phase === "ask") return <div className="nbk-loading">One second…</div>;
 
   // ── answering ────────────────────────────────────────────────────────────
   async function toggleMic() {
@@ -48,7 +59,7 @@ export default function Onboarding({ state, onDone, onQuit }) {
       setBusy("Getting that down");
       try {
         const text = await rec.current.stopAndTranscribe(mime.current);
-        if (!text) { setBusy(""); setHeard(""); return; }
+        if (!text) { setBusy(""); return; }
         setHeard(text);
         await accept(text);
       } catch (err) { setBusy(""); setHeard(String(err.message)); }
@@ -64,57 +75,57 @@ export default function Onboarding({ state, onDone, onQuit }) {
   }
 
   async function accept(text) {
-    const next = [...answers];
-    next[qi] = text;
+    const next = { ...answers, [step.id]: text };
     setAnswers(next);
+    await rebuild(next, pomodoro);
+  }
+
+  async function rebuild(nextAnswers, nextPom) {
     setBusy("Writing that down");
     try {
-      // Re-run the summarizer on everything said so far. Five short calls beat
-      // an incremental diff, which is a category of bug you do not want in a demo.
-      const nb = await api("yap", { answers: next, timezone: tz() });
-      setFresh(diff(nb, lastSig.current));
+      const nb = await api("yap", { answers: nextAnswers, timezone: tz(), pomodoro: nextPom });
+      setFresh(diff(nb, sigs.current));
       setBook(nb);
-    } catch (err) { setHeard(`${text}\n\n(I could not write that down: ${err.message})`); }
+    } catch (err) { setHeard((h) => `${h}\n\n(I could not write that down: ${err.message})`); }
     setBusy("");
   }
 
   function submitTyped() {
     const text = draft.trim();
-    setTyping(false);
-    setDraft("");
+    setTyping(false); setDraft("");
     if (!text) return;
     setHeard(text);
     accept(text);
   }
 
+  async function pickPomodoro(choice) {
+    const next = { work: choice.work, break: choice.brk };
+    setPomodoro(next);
+    setAnswers((a) => ({ ...a, [step.id]: choice.value }));
+    if (Object.keys(answers).length) await rebuild(answers, next);
+    setI(i + 1);
+  }
+
   async function next() {
     if (busy) return;
     if (phase === "ask") {
-      if (qi < 4) return setQi(qi + 1);
-      if (!book) {
-        setBusy("Writing it all down");
-        try { setBook(await api("yap", { answers, timezone: tz() })); } catch { /* show what we have */ }
-        setBusy("");
-      }
+      if (i < steps.length - 1) return setI(i + 1);
+      if (!book) { await rebuild(answers, pomodoro); }
       return setPhase("readback");
     }
-    if (phase === "readback") {
-      setBusy("Saving");
-      try {
-        await api("notebook", { notebook: book, approved: true });
-        stopSpeech();
-        onDone();
-      } catch (err) { setBusy(""); setHeard(String(err.message)); }
-    }
+    setBusy("Saving");
+    try {
+      await api("notebook", { notebook: book, approved: true });
+      stopSpeech();
+      onDone();
+    } catch (err) { setBusy(""); setHeard(String(err.message)); }
   }
 
-  const answered = Boolean(answers[qi]);
-  const label = phase === "readback" ? "Read-back" : `Question ${qi + 1} of 5`;
-  const headline = phase === "readback" ? "Here is *what I got*." : (asked[qi] || "");
+  const answered = phase === "readback" || Boolean(answers[step?.id]);
+  const isChoice = step?.mode === "choice";
 
   return (
     <div className="ob">
-      {/* He asks. */}
       <section className="ob-rail">
         <header className="ob-mark">
           <span className="ob-mark-badge"><Greeno size={26} /></span>
@@ -125,19 +136,50 @@ export default function Onboarding({ state, onDone, onQuit }) {
         </header>
 
         <div className="ob-q">
-          <div className="ob-q-label">{label}</div>
-          <h2 className="display ob-q-text">{emphasise(headline)}</h2>
+          <div className="ob-q-label">
+            {phase === "readback"
+              ? "Read-back"
+              : <>Part {partIndex + 1} of {parts.length} · {step.part.title}</>}
+          </div>
+
+          <h2 className="display ob-q-text">
+            {emphasise(phase === "readback" ? "Here is *what I got*." : step.display)}
+          </h2>
+
+          {phase === "ask" && (
+            <>
+              <p className="ob-helper">{step.helper}</p>
+              {step.example && !heard && (
+                // One whole sentence, the way somebody would actually say it.
+                // A row of chips reads as buttons and makes people hunt for the
+                // "right" answer instead of just talking.
+                <p className="ob-example">For example: “{step.example}”</p>
+              )}
+            </>
+          )}
 
           {heard && <div className={`ob-heard${recording ? " is-live" : ""}`}>{heard}</div>}
 
-          {phase === "ask" && !typing && (
+          {phase === "ask" && isChoice && (
+            <div className="ob-choices">
+              {step.choices.map((c) => (
+                <button
+                  key={c.value}
+                  className={`ob-choice${pomodoro.work === c.work ? " is-on" : ""}`}
+                  onClick={() => pickPomodoro(c)}
+                >
+                  <b>{c.label}</b><span>{c.note}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {phase !== "readback" && !isChoice && !typing && (
             <div className="ob-mic-row">
               <button
                 className={`ob-mic${recording ? " is-live" : ""}`}
                 style={recording ? { "--pulse": `${6 + level * 22}px` } : undefined}
-                onClick={toggleMic}
-                disabled={Boolean(busy)}
-                aria-label="Answer out loud"
+                onClick={toggleMic} disabled={Boolean(busy)} aria-label="Answer out loud"
               >
                 <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
                   <rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor" />
@@ -151,7 +193,7 @@ export default function Onboarding({ state, onDone, onQuit }) {
                     : answered ? "Answered. Hit the mic to redo it."
                     : "Hit the mic and just talk."}
                 </div>
-                <button className="ob-type-toggle" onClick={() => { stopSpeech(); setTyping(true); setDraft(answers[qi] || ""); }}>
+                <button className="ob-type-toggle" onClick={() => { stopSpeech(); setTyping(true); setDraft(answers[step.id] || ""); }}>
                   or type it instead
                 </button>
               </div>
@@ -160,15 +202,13 @@ export default function Onboarding({ state, onDone, onQuit }) {
 
           {phase === "ask" && typing && (
             <div className="ob-typer">
-              <textarea
-                autoFocus rows={4} value={draft}
+              <textarea autoFocus rows={4} value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); submitTyped(); }
                   if (e.key === "Escape") setTyping(false);
                 }}
-                placeholder="Type your answer. Cmd + Enter when you are done."
-              />
+                placeholder={step.example ? `e.g. ${step.example}` : "Type your answer. Cmd + Enter when done."} />
               <div className="ob-typer-row">
                 <button className="ob-type-toggle" onClick={() => setTyping(false)}>Cancel</button>
                 <button className="btn btn-primary" onClick={submitTyped}>Done</button>
@@ -179,31 +219,30 @@ export default function Onboarding({ state, onDone, onQuit }) {
 
         <div>
           <div className="ob-steps">
-            {STEPS.map((title, i) => (
-              <div key={title} className={`ob-step${answers[i] ? " is-done" : ""}${phase === "ask" && qi === i ? " is-now" : ""}`}>
+            {parts.map((p, pi) => (
+              <div key={p.section} className={`ob-step${pi < partIndex || phase === "readback" ? " is-done" : ""}${pi === partIndex && phase === "ask" ? " is-now" : ""}`}>
                 <span className="ob-step-dot" />
-                <span>{title}</span>
+                <span>{p.title}</span>
+                <span className="ob-step-n">
+                  {p.steps.filter((s) => answers[s.id]).length}/{p.steps.length}
+                </span>
               </div>
             ))}
           </div>
           <div className="ob-rail-foot">
-            <button className="ob-link" onClick={() => (phase === "readback" ? setPhase("ask") : qi > 0 ? setQi(qi - 1) : onQuit())}>
-              ← Back
-            </button>
-            <button className="ob-link" onClick={() => (qi < 4 ? setQi(qi + 1) : setPhase("readback"))}>Skip this one</button>
+            <button className="ob-link" onClick={() => (phase === "readback" ? setPhase("ask") : i > 0 ? setI(i - 1) : onQuit())}>← Back</button>
+            <button className="ob-link" onClick={() => (i < steps.length - 1 ? setI(i + 1) : setPhase("readback"))}>Skip this one</button>
           </div>
         </div>
       </section>
 
-      {/* It gets written down. */}
       <NotebookPanel
         book={book} fresh={fresh}
-        focusOn={phase === "ask" ? SECTION[qi] : null}
-        phase={phase}
-        busy={busy}
+        focusOn={phase === "ask" ? step.section : null}
+        phase={phase} busy={busy}
         onNext={next}
-        nextLabel={phase === "readback" ? "Looks right" : qi === 4 ? "See what I got" : "Continue"}
-        nextDisabled={Boolean(busy) || (phase === "ask" && !answered)}
+        nextLabel={phase === "readback" ? "Looks right" : i === steps.length - 1 ? "See what I got" : "Continue"}
+        nextDisabled={Boolean(busy) || (phase === "ask" && !isChoice && !answered)}
       />
     </div>
   );
@@ -220,39 +259,62 @@ function rowsFor(section, book) {
   }
   if (section === "habits") {
     return [
-      ...(book.habits || []).map((h) => ({ key: `h:${h.id}`, title: h.title, why: h.why, meta: `${h.target} ${h.unit} · ${h.cadence}` })),
-      ...(book.slipping || []).map((s, i) => ({ key: `s:${i}`, title: s, meta: "keeps slipping" })),
+      ...(book.habits || []).map((h) => ({
+        key: `h:${h.id}`, title: h.title, why: h.why,
+        meta: `${h.target} ${h.unit} · ${h.cadence}`,
+        tag: h.state === "building" ? "building" : "current",
+      })),
+      ...(book.slipping || []).map((s, n) => ({ key: `s:${n}`, title: s, meta: "keeps slipping" })),
     ];
   }
   const out = [];
-  (book.focus?.deepWork || []).forEach((w, i) => out.push({ key: `d:${i}`, title: "Deep work", meta: `${(w.days || []).join(" ")} · ${w.start}-${w.end}` }));
-  (book.focus?.distractions || []).forEach((d, i) => out.push({ key: `x:${i}`, title: d, meta: "pulls you out" }));
-  const m = book.focus?.music;
-  if (m && (m.mood || m.playlist)) out.push({ key: "m", title: m.playlist || m.mood, why: m.playlist && m.mood ? m.mood : "", meta: m.service !== "none" ? m.service : "music" });
+  const f = book.focus || {};
+  if (f.pomodoro?.work) out.push({ key: "p", title: `${f.pomodoro.work} / ${f.pomodoro.break}`, meta: "focus block" });
+  (f.deepWork || []).forEach((w, n) => out.push({ key: `d:${n}`, title: "Deep work", meta: `${(w.days || []).join(" ")} · ${w.start}-${w.end}` }));
+  (f.distractions || []).forEach((d, n) => out.push({ key: `x:${n}:${d}`, title: d, meta: "breaks your focus" }));
+  if (f.music && (f.music.mood || f.music.playlist)) {
+    out.push({
+      key: "m", title: f.music.playlist || f.music.mood,
+      why: f.music.playlist && f.music.mood ? f.music.mood : "",
+      meta: f.music.service && f.music.service !== "none" ? f.music.service : "music",
+    });
+  }
   return out;
 }
 
 // Animate on CHANGE, not on render, or the whole panel strobes every answer.
-function diff(book, sigs) {
+function diff(book, store) {
   const fresh = new Set();
   for (const section of ["routines", "habits", "focus"]) {
     for (const r of rowsFor(section, book)) {
       const sig = `${r.title}|${r.why || ""}|${r.meta}`;
-      if (sigs.get(r.key) !== sig) fresh.add(r.key);
-      sigs.set(r.key, sig);
+      if (store.get(r.key) !== sig) fresh.add(r.key);
+      store.set(r.key, sig);
     }
   }
   return fresh;
 }
 
 const EMPTY = {
-  routines: "Nothing yet. Tell me how a normal day goes.",
-  habits: "Nothing yet. Tell me what keeps slipping.",
-  focus: "Nothing yet. Tell me when your head is clear.",
+  routines: "Nothing yet. Tell me what a normal weekday looks like.",
+  habits: "Nothing yet. Tell me what you already do.",
+  focus: "Nothing yet. Tell me what you listen to when you work.",
 };
 
 function NotebookPanel({ book, fresh, focusOn, phase, busy, onNext, nextLabel, nextDisabled }) {
-  const total = ["routines", "habits", "focus"].reduce((n, s) => n + rowsFor(s, book).length, 0);
+  const SECTIONS = [
+    ["habits", "what I will hold you to"],
+    ["focus", "when your head is clear, and what breaks it"],
+    ["routines", "the shape your day already has"],
+  ];
+  const [picked, setPicked] = useState(null);
+  const active = picked || focusOn || "habits";
+  useEffect(() => { setPicked(null); }, [focusOn]);
+
+  const counts = Object.fromEntries(SECTIONS.map(([s]) => [s, rowsFor(s, book).length]));
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  const rows = rowsFor(active, book);
+
   return (
     <section className="ob-book">
       <header className="ob-book-head">
@@ -261,41 +323,42 @@ function NotebookPanel({ book, fresh, focusOn, phase, busy, onNext, nextLabel, n
           <p className="ob-book-sub">
             {phase === "readback"
               ? "Everything below came out of what you just told me. Nothing is invented."
-              : total
-                ? "This is you, in your own words. Keep going and it keeps filling."
-                : "Empty for now. It fills in while you talk, and nothing saves until you approve it."}
+              : total ? "This is you, in your own words. Keep going and it keeps filling."
+              : "Empty for now. It fills in while you talk, and nothing saves until you approve it."}
           </p>
         </div>
         {total > 0 && <div className="ob-book-count">{total} things I know about you</div>}
       </header>
 
+      <nav className="ob-tabs">
+        {SECTIONS.map(([sec]) => (
+          <button key={sec}
+            className={`ob-tab${active === sec ? " is-on" : ""}${focusOn === sec ? " is-filling" : ""}`}
+            onClick={() => setPicked(sec)}>
+            {sec[0].toUpperCase() + sec.slice(1)}
+            {counts[sec] ? <span className="ob-tab-n">{counts[sec]}</span> : null}
+          </button>
+        ))}
+      </nav>
+
       <div className="ob-book-scroll">
-        {[["routines", "the shape your day already has"],
-          ["habits", "what I will hold you to"],
-          ["focus", "when your head is clear, and what breaks it"]].map(([sec, note]) => {
-          const rows = rowsFor(sec, book);
-          return (
-            <section key={sec} className={`ob-sec${focusOn === sec ? " is-focused" : ""}`}>
-              <div className="ob-sec-head">
-                <span className="badge">{sec}</span>
-                <span className="ob-sec-note">{note}</span>
-              </div>
-              <div className="ob-rows">
-                {rows.length === 0
-                  ? <div className="ob-empty">{EMPTY[sec]}</div>
-                  : rows.map((r) => (
-                      <div key={r.key} className={`ob-row${fresh.has(r.key) ? " is-new" : ""}`}>
-                        <div>
-                          <div className="ob-row-title">{r.title}</div>
-                          {r.why && <div className="ob-row-why">{r.why}</div>}
-                        </div>
-                        <div className="ob-row-meta">{r.meta}</div>
-                      </div>
-                    ))}
-              </div>
-            </section>
-          );
-        })}
+        <p className="ob-tab-note">{SECTIONS.find(([s]) => s === active)[1]}</p>
+        <div className="ob-rows">
+          {rows.length === 0
+            ? <div className="ob-empty">{EMPTY[active]}</div>
+            : rows.map((r) => (
+                <div key={r.key} className={`ob-row${fresh.has(r.key) ? " is-new" : ""}`}>
+                  <div>
+                    <div className="ob-row-title">
+                      {r.title}
+                      {r.tag && <span className={`ob-tag is-${r.tag}`}>{r.tag}</span>}
+                    </div>
+                    {r.why && <div className="ob-row-why">{r.why}</div>}
+                  </div>
+                  <div className="ob-row-meta">{r.meta}</div>
+                </div>
+              ))}
+        </div>
       </div>
 
       <footer className="ob-book-foot">

@@ -33,7 +33,7 @@ const store = require("../app/lib/store.cjs");
 const nb = require("../app/lib/notebook.cjs");
 const openai = require("../app/lib/openai.cjs");
 const tts = require("../app/lib/tts.cjs");
-const { yapToNotebook, QUESTIONS, ASKED, ASKED_DISPLAY } = require("../app/lib/yap.cjs");
+const { yapToNotebook, PARTS, STEPS } = require("../app/lib/yap.cjs");
 const { morningGreet } = require("../app/lib/greet.cjs");
 const { debrief } = require("../app/lib/debrief.cjs");
 const { turn } = require("../app/lib/turn.cjs");
@@ -113,11 +113,29 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 /** Everything the habits tab needs, computed server-side so the client never
  *  disagrees with him about a streak. */
+// The last seven days, oldest first, so the dashboard can draw the grid that
+// makes a habit tracker look like a habit tracker.
+function lastSevenDays() {
+  const out = [];
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 86400000);
+    out.push({
+      day: d.toISOString().slice(0, 10),
+      label: ["S", "M", "T", "W", "T", "F", "S"][d.getDay()],
+      isToday: i === 0,
+    });
+  }
+  return out;
+}
+
 function habitsView() {
   const book = store.getNotebook();
   if (!book) return [];
   const checkins = store.checkinsSince(60);
   const day = today();
+  const week = lastSevenDays();
+
   return nb.progress(book, checkins).map((h) => {
     const row = checkins.find((c) => c.habitId === h.id && c.day === day);
     return {
@@ -125,8 +143,30 @@ function habitsView() {
       streak: store.streakFor(h.id, h.target),
       todayValue: row ? Number(row.value) : 0,
       todayNote: row?.note || "",
+      // One cell per day: what was logged, and whether it met the target.
+      week: week.map((d) => {
+        const c = checkins.find((x) => x.habitId === h.id && x.day === d.day);
+        const value = c ? Number(c.value) : 0;
+        return { ...d, value, hit: value >= h.target, partial: value > 0 && value < h.target };
+      }),
     };
   });
+}
+
+// How the week actually went, across everything. The number at the top of a
+// tracker is the one people come back for.
+function weekSummary() {
+  const book = store.getNotebook();
+  if (!book?.habits?.length) return { done: 0, possible: 0, pct: 0, bestStreak: 0 };
+  const rows = habitsView();
+  let done = 0, possible = 0, bestStreak = 0;
+  for (const h of rows) {
+    bestStreak = Math.max(bestStreak, h.streak || 0);
+    // Only daily habits have a meaningful per-day denominator.
+    if (h.cadence !== "daily") continue;
+    for (const d of h.week) { possible++; if (d.hit) done++; }
+  }
+  return { done, possible, pct: possible ? Math.round((done / possible) * 100) : 0, bestStreak };
 }
 
 const view = () => ({
@@ -134,6 +174,8 @@ const view = () => ({
   approved: store.isApproved(),
   settings: store.getSettings(),
   progress: habitsView(),
+  week: weekSummary(),
+  days: lastSevenDays(),
   dueToday: store.getNotebook() ? nb.habitsDueToday(store.getNotebook()).map((h) => h.id) : [],
 });
 
@@ -143,16 +185,17 @@ app.get("/api/state", route(() => ({ ...view(), ...meta() })));
 app.post("/api/state", route(() => ({ ...view(), ...meta() })));
 
 const meta = () => ({
-  questions: QUESTIONS,
-  asked: ASKED,
-  askedDisplay: ASKED_DISPLAY,
+  // The onboarding is served from here so the copy lives in one place and the
+  // Mac app and the web app cannot drift into asking different questions.
+  parts: PARTS,
+  steps: STEPS,
   hasOpenAI: openai.hasKey(),
   hasFish: Boolean(process.env.FISH_AUDIO_API_KEY),
   serverless: !LOCAL_DIR,
 });
 
 app.post("/api/yap", route((req) =>
-  yapToNotebook(req.body.answers || [], req.body.timezone || "UTC")));
+  yapToNotebook(req.body.answers || {}, req.body.timezone || "UTC", req.body.pomodoro)));
 
 app.post("/api/notebook", route((req) => {
   store.saveNotebook(nb.ensureIds(req.body.notebook), { approved: Boolean(req.body.approved) });

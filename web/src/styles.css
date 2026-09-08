@@ -321,3 +321,104 @@ body {
 @media (max-width: 700px) {
   .greet { grid-template-columns: 1fr; }
 }
+
+/* ── the onboarding panel's tabs ───────────────────────────────────────────
+   Three stacked boxes meant the section being filled right now could be
+   scrolled off screen, which is the one thing this panel exists to show. The
+   tab follows the question, and glows while that section is the one filling. */
+.ob-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--stone); margin-top: 20px; }
+.ob-tab {
+  background: none; border: 0; padding: 11px 14px 10px;
+  font: 600 13.5px var(--body); color: var(--fog); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.ob-tab:hover { color: var(--ink); }
+.ob-tab.is-on { color: var(--ink); border-bottom-color: var(--forest); }
+.ob-tab.is-filling:not(.is-on) { color: var(--ink); }
+.ob-tab.is-filling::after {
+  content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 7px;
+  border-radius: 50%; background: var(--ember); vertical-align: middle;
+}
+.ob-tab-n {
+  display: inline-block; margin-left: 7px; font: 600 11px var(--body);
+  color: var(--fog); background: var(--stone); padding: 3px 6px; border-radius: var(--r-pill);
+}
+.ob-tab.is-on .ob-tab-n { color: var(--on-dark); background: var(--forest); }
+.ob-tab-note { font-size: 12.5px; color: var(--fog); margin: 16px 0 4px; }
+
+/* ── the numbers ──────────────────────────────────────────────────────────── */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat { border: 1px solid var(--stone); border-radius: 16px; padding: 16px 18px; display: grid; gap: 4px; }
+.stat-n { font-family: var(--display); font-size: 34px; line-height: 1; letter-spacing: -.03em; }
+.stat-n i { font-style: normal; font-size: 17px; color: var(--fog); margin-left: 2px; }
+.stat-l { font-size: 12px; color: var(--fog); letter-spacing: .02em; }
+
+/* ── the week grid ────────────────────────────────────────────────────────
+   Habits down, days across. This is the shape a habit tracker has, and a list
+   of rows is not it: the grid is what makes the gaps visible at a glance. */
+.grid-wrap {
+  border: 1px solid var(--stone); border-radius: 20px;
+  padding: 16px 18px; margin-bottom: 28px; overflow-x: auto;
+}
+.grid-head, .grid-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1.4fr) repeat(7, 34px) 40px;
+  gap: 8px; align-items: center;
+}
+.grid-head { padding-bottom: 10px; border-bottom: 1px solid var(--stone); margin-bottom: 6px; }
+.grid-day {
+  text-align: center; font: 600 11px var(--body); color: var(--fog);
+  letter-spacing: .06em; text-transform: uppercase;
+}
+.grid-day.is-today { color: var(--ink); }
+.grid-row { padding: 7px 0; }
+.grid-name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grid-streak { font: 600 11px var(--body); color: var(--fog); text-align: right; font-variant-numeric: tabular-nums; }
+
+.cell {
+  width: 34px; height: 34px; border-radius: 9px; cursor: pointer;
+  border: 1px solid var(--stone); background: transparent; padding: 0;
+  transition: background 140ms ease, border-color 140ms ease, transform 100ms ease;
+}
+.cell:hover { border-color: var(--ink); }
+.cell:active { transform: scale(.92); }
+.cell.is-hit { background: var(--forest); border-color: var(--forest); }
+/* Something, but not the target. Half a day is not a failed day. */
+.cell.is-partial { background: color-mix(in srgb, var(--forest) 34%, transparent); border-color: color-mix(in srgb, var(--forest) 46%, transparent); }
+.cell.is-today { border-width: 2px; border-color: var(--ink); }
+.cell.is-today.is-hit { border-color: var(--forest); }
+
+@media (prefers-reduced-motion: reduce) { .cell { transition: none; } }
+
+/* ── onboarding: helper, example, choices ─────────────────────────────────── */
+.ob-helper { font-size: 14px; line-height: 1.5; color: rgba(255,255,235,.7); margin: 0; }
+/* One whole sentence, the way somebody would actually say it. A row of chips
+   reads as buttons and makes people hunt for the "right" answer. */
+.ob-example {
+  font-family: var(--display); font-style: italic; font-size: 15.5px; line-height: 1.45;
+  color: rgba(255,255,235,.52); margin: 0;
+}
+
+.ob-choices { display: flex; gap: 10px; flex-wrap: wrap; }
+.ob-choice {
+  display: grid; gap: 2px; justify-items: start;
+  padding: 13px 18px; border-radius: var(--r-btn); cursor: pointer;
+  border: 2px solid rgba(255,255,235,.28); background: transparent; color: var(--on-dark);
+  font-family: var(--body);
+}
+.ob-choice:hover { border-color: var(--on-dark); }
+.ob-choice.is-on { background: var(--ember); border-color: var(--ember); color: var(--ink); }
+.ob-choice b { font-size: 17px; font-weight: 600; }
+.ob-choice span { font-size: 12px; opacity: .68; }
+
+.ob-step { grid-template-columns: 15px 1fr auto; }
+.ob-step-n { font: 600 11px var(--body); opacity: .6; font-variant-numeric: tabular-nums; }
+
+/* current vs building: the same habit list holds both, and they are not the
+   same promise. */
+.ob-tag {
+  margin-left: 8px; font: 600 10px var(--body); letter-spacing: .06em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: var(--r-pill); vertical-align: middle;
+}
+.ob-tag.is-current { background: var(--stone); color: var(--charcoal); }
+.ob-tag.is-building { background: var(--lavender); color: var(--on-lavender); }

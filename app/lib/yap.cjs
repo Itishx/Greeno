@@ -1,77 +1,155 @@
-// Yap to notebook. P0 number one, and the 99% engine everything else consumes.
+// Yap to notebook. The engine everything else consumes.
 //
-// The whole trick: the model FILLS A SCHEMA, it does not write prose. Structured
-// output, not a summary.
+// The whole trick: the model FILLS A SCHEMA, it does not write prose.
 //
-// The schema is the dashboard's three sections, in the dashboard's own words:
-// routines, habits, focus. Naming them the same thing in both places is what
-// keeps the read-back legible: the person sees the section fill in as they talk
-// about it.
+// The questions are segregated by the three sections the product actually is,
+// because an earlier set was written for a general companion and then never
+// re-cut when this became a tracker with three tabs. That set asked things like
+// "what do you wish just happened on its own", which extracts almost nothing a
+// tracker can hold, and left the person unsure what kind of answer was wanted.
+//
+// Two rules learned from that:
+//   1. The QUESTION is short enough to answer out loud. The detail lives in a
+//      helper line underneath, not in the question.
+//   2. Every question shows one example answer, written as a whole spoken
+//      sentence. That is what tells someone HOW MUCH to say. A list of chips
+//      reads as buttons and makes people hunt for the right one.
 
 const { structured } = require("./openai.cjs");
 const { ensureIds } = require("./notebook.cjs");
 
-// The five questions, in order. The summarizer is told which answer is which,
-// because "what keeps slipping" and "what do you wish just happened" produce
-// very similar language and merge into each other without the labels.
-const QUESTIONS = [
-  "walk me through a normal day",
-  "what keeps slipping",
-  "when is your deep work, and what pulls you out of it",
-  "what do you listen to",
-  "what do you wish just happened on its own",
+/**
+ * The onboarding, in three parts, in the order the sections appear.
+ *
+ * Habits first on purpose: it is the most concrete thing to talk about, so it
+ * warms someone up, and it is the section that makes the panel fill fastest.
+ * mode "choice" is a tap, not speech: asking somebody to say "twenty five
+ * minutes on, five off" out loud is worse than two buttons.
+ */
+const PARTS = [
+  {
+    section: "habits",
+    title: "Habits",
+    intro: "Let's start with what you actually do, and what you want to do.",
+    steps: [
+      {
+        id: "habits_current",
+        mode: "voice",
+        spoken: "What are your habits right now?",
+        display: "What are your *habits* right now?",
+        helper: "Things you already do. Gym, reading, journalling, a walk. Tell me roughly how often.",
+        example: "gym maybe three times a week, and I read most nights",
+      },
+      {
+        id: "habits_wanted",
+        mode: "voice",
+        spoken: "And which habits do you want to build?",
+        display: "Which habits do you want to *build*?",
+        helper: "The ones you keep meaning to start. Tell me why if you know, I will keep your words.",
+        example: "actually get to the gym, and read before bed instead of scrolling",
+      },
+    ],
+  },
+  {
+    section: "focus",
+    title: "Focus",
+    // Explained before it is asked about. "What do you listen to" arriving with
+    // no context is what made the old version feel arbitrary.
+    intro: "Focus mode is a timer. You say start, I put your music on and count you down.",
+    steps: [
+      {
+        id: "focus_music",
+        mode: "voice",
+        spoken: "What do you listen to when you work?",
+        display: "What do you *listen to* when you work?",
+        helper: "An artist, a playlist, or just a vibe. Tell me if it is Spotify or Apple Music.",
+        example: "lofi on Spotify, or brown noise when it is really bad",
+      },
+      {
+        id: "focus_pomodoro",
+        mode: "choice",
+        spoken: "How long should one focus block be?",
+        display: "How long is one *focus block*?",
+        helper: "You can change this later.",
+        choices: [
+          { value: "25/5", work: 25, brk: 5, label: "25 / 5", note: "classic" },
+          { value: "50/10", work: 50, brk: 10, label: "50 / 10", note: "deep" },
+          { value: "90/20", work: 90, brk: 20, label: "90 / 20", note: "long haul" },
+        ],
+      },
+      {
+        id: "focus_window",
+        mode: "voice",
+        spoken: "When do you focus best, and what interrupts you?",
+        display: "When do you focus *best*, and what interrupts you?",
+        helper: "A rough time window is fine. Name the thing that actually breaks your focus.",
+        example: "nine to eleven in the morning, and Slack kills me",
+      },
+    ],
+  },
+  {
+    section: "routines",
+    title: "Routines",
+    intro: "Last part. The shape your day already has.",
+    steps: [
+      {
+        id: "routine_day",
+        mode: "voice",
+        spoken: "What does a normal weekday look like?",
+        display: "What does a normal *weekday* look like?",
+        helper: "Things that happen at a set time. Classes, standup, commute, gym.",
+        example: "lectures ten to one, standup at eleven, gym Tuesday and Thursday",
+      },
+      {
+        id: "routine_goal",
+        mode: "voice",
+        spoken: "And what are you working towards?",
+        display: "What are you *working towards*?",
+        helper: "The project or goal behind all this. One line.",
+        example: "shipping my startup by December",
+      },
+    ],
+  },
 ];
 
-// Which section each answer mostly feeds. Drives the live highlight on the right
-// hand panel: while they answer question three, the focus card is the one lit up.
-const QUESTION_SECTION = ["routines", "habits", "focus", "focus", "routines"];
+// Flat list of the spoken steps, in order. The summarizer sees these labelled,
+// because "what you already do" and "what you want to build" produce very
+// similar language and merge into each other without the labels.
+const STEPS = PARTS.flatMap((p) => p.steps.map((s) => ({ ...s, section: p.section })));
+const VOICE_STEPS = STEPS.filter((s) => s.mode === "voice");
 
-// What he actually says out loud. The question above is the job; this is the wording.
-const ASKED = [
-  "So. Walk me through a normal day for you. Start wherever your day actually starts.",
-  "What keeps slipping? The stuff you mean to do and then somehow do not.",
-  "When is your head actually clear enough for real work? And what pulls you out of it?",
-  "What do you listen to when you are trying to focus?",
-  "Last one. What do you wish just happened on its own, without you having to think about it?",
-];
-
-const SYSTEM = `You are turning a person's spoken description of their life into a structured notebook.
+const SYSTEM = `You are turning a person's spoken answers into a structured notebook for a habit tracker.
 
 You are NOT summarizing and you are NOT writing prose. You are filling in a schema from what they said.
 
-The notebook has three sections and every field belongs to one of them:
+The notebook has three sections:
 
-ROUTINES: the recurring shape of their day (the "routines" array), plus the things they wish just happened on their own (the "automations" array). An automation is a routine they do not have yet.
+HABITS: things they do or want to do a certain amount of. Each one is either something they ALREADY do (state "current") or something they are trying to start (state "building"). The first question is about current habits and the second is about ones they want to build, so use the question labels to decide. "slipping" holds, in their own words, whatever they said keeps not happening.
 
-HABITS: the things with a target and a cadence, which is what you will hold them to (the "habits" array), plus what keeps slipping (the "slipping" array, in their own words).
+FOCUS: when their head is clear ("deepWork"), what breaks it ("distractions"), what they listen to ("music"), and how long a focus block should be ("pomodoro").
 
-FOCUS: when their head is clear, what pulls them out, and what they listen to (the "focus" object).
+ROUTINES: things that already happen at a set time ("routines"), and anything they wished happened on its own ("automations").
 
 Rules that decide whether this works:
 
-1. Use THEIR words. If they said "the group chat eats my afternoon", the distraction is "the group chat", not "social media". A person reads this back and approves it when they recognise themselves in it.
+1. Use THEIR words. If they said "the group chat eats my afternoon", the distraction is "the group chat", not "social media". A person approves this when they recognise themselves in it.
 
-2. Never invent a habit they did not state. If they mentioned reading but named no number, target is 1 and unit is "session". A made-up "20 pages" is the single fastest way to lose the approval.
+2. NEVER invent a number they did not say. If they said "read more" the target is 1 and the unit is "session". If they said "gym three times a week" the target is 3 and the unit is "sessions". A made-up "20 pages" is the fastest way to lose their approval.
 
-3. A routine is something that already happens at a time. A habit is something they are trying to do a certain amount of. "Lectures at nine" is a routine. "Read more" is a habit. If they described it as already happening on a schedule, it is a routine, not a habit.
+3. A ROUTINE already happens at a time. A HABIT is an amount they are trying to hit. "Lectures at ten" is a routine. "Read more" is a habit. If they described it as already happening on a schedule, it is a routine.
 
-4. Times: convert everything to 24-hour "HH:MM". "After lunch" is 13:00. "Morning" with no hour is 09:00. "First thing" is their startTime.
+4. Times become 24-hour "HH:MM". "After lunch" is 13:00. "Morning" with no hour is 09:00. "Nine to eleven" is 09:00 to 11:00.
 
-5. If they never said when their day starts, set startTime to 08:30 and let them fix it at read-back.
+5. If they never said when their day starts, infer it from their earliest routine, and otherwise use 08:30.
 
-6. Anything they wished for out loud goes in automations with status "wished", even if it sounds impossible. That list is a promise, not a backlog.
+6. Empty is better than wrong. An empty array is a question at read-back; a wrong entry is a correction, and corrections are what lose the approval.
 
-7. Anything they name as slipping is ALSO a habit. If they said the gym keeps slipping, that is them telling you they want to go: put it in habits with the smallest honest target, AND record their own words in slipping. The two lists are the same fact seen twice, one as a target and one as a feeling. A slipping list with no matching habit gives him nothing to hold them to, and the whole night debrief has nothing to write against.
+7. Anything they wished happened by itself goes in automations with status "wished", even if it sounds impossible.
 
-8. Empty is better than wrong. An empty array is a question at read-back; a wrong entry is a correction, and corrections are what break the 99%.
-
-9. Never use an em-dash or an en-dash anywhere in any field.`;
+8. Never use an em-dash or an en-dash anywhere in any field.`;
 
 const DAY_ENUM = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
-// The schema is enforced by the API, not by the prompt. A prompt that asks
-// politely for JSON gets JSON most of the time, and "most of the time" is a
-// crash in the middle of someone's onboarding.
 const NOTEBOOK_SCHEMA = {
   type: "object",
   additionalProperties: false,
@@ -80,70 +158,32 @@ const NOTEBOOK_SCHEMA = {
     startTime: { type: "string", description: "HH:MM, when their day starts" },
     timezone: { type: "string" },
 
-    // ── ROUTINES ────────────────────────────────────────────────────────────
-    routines: {
-      type: "array",
-      description: "Recurring blocks that already happen: lectures, standup, gym, commute.",
-      items: {
-        type: "object",
-        additionalProperties: false,
-        required: ["id", "label", "days", "start", "end", "kind"],
-        properties: {
-          id: { type: "string" },
-          label: { type: "string" },
-          days: { type: "array", items: { type: "string", enum: DAY_ENUM } },
-          start: { type: "string" },
-          end: { type: "string" },
-          kind: { type: "string", enum: ["fixed", "deep_work", "flexible"] },
-        },
-      },
-    },
-    automations: {
-      type: "array",
-      description: "Routines they wish they had. Status is always 'wished' from the yap.",
-      items: {
-        type: "object",
-        additionalProperties: false,
-        required: ["id", "title", "trigger", "detail", "status"],
-        properties: {
-          id: { type: "string" },
-          title: { type: "string" },
-          trigger: { type: "string", enum: ["morning", "evening", "weekday", "manual"] },
-          detail: { type: "string" },
-          status: { type: "string", enum: ["wished", "armed"] },
-        },
-      },
-    },
-
-    // ── HABITS ──────────────────────────────────────────────────────────────
     habits: {
       type: "array",
-      description: "Things they are trying to do a certain amount of, with a cadence and a target.",
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["id", "title", "cadence", "target", "unit", "why"],
+        required: ["id", "title", "cadence", "target", "unit", "why", "state"],
         properties: {
           id: { type: "string" },
           title: { type: "string" },
           cadence: { type: "string", enum: ["daily", "weekly", "monthly"] },
           target: { type: "number" },
           unit: { type: "string" },
-          why: { type: "string", description: "their own reason in their words, empty string if they gave none" },
+          why: { type: "string", description: "their own reason, empty string if they gave none" },
+          // Separating these is the point of asking two questions instead of
+          // one: people describe what they already do accurately and what they
+          // intend aspirationally, and a tracker should not treat them alike.
+          state: { type: "string", enum: ["current", "building"] },
         },
       },
     },
-    slipping: {
-      type: "array",
-      description: "What keeps not happening, in their own words.",
-      items: { type: "string" },
-    },
+    slipping: { type: "array", items: { type: "string" } },
 
-    // ── FOCUS ───────────────────────────────────────────────────────────────
     focus: {
       type: "object",
       additionalProperties: false,
-      required: ["deepWork", "distractions", "music"],
+      required: ["deepWork", "distractions", "music", "pomodoro"],
       properties: {
         deepWork: {
           type: "array",
@@ -169,18 +209,61 @@ const NOTEBOOK_SCHEMA = {
             playlist: { type: "string" },
           },
         },
+        pomodoro: {
+          type: "object",
+          additionalProperties: false,
+          required: ["work", "break"],
+          properties: {
+            work: { type: "number", description: "minutes of work, default 25" },
+            break: { type: "number", description: "minutes of break, default 5" },
+          },
+        },
+      },
+    },
+
+    routines: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["id", "label", "days", "start", "end", "kind"],
+        properties: {
+          id: { type: "string" },
+          label: { type: "string" },
+          days: { type: "array", items: { type: "string", enum: DAY_ENUM } },
+          start: { type: "string" },
+          end: { type: "string" },
+          kind: { type: "string", enum: ["fixed", "deep_work", "flexible"] },
+        },
+      },
+    },
+    automations: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["id", "title", "trigger", "detail", "status"],
+        properties: {
+          id: { type: "string" },
+          title: { type: "string" },
+          trigger: { type: "string", enum: ["morning", "evening", "weekday", "manual"] },
+          detail: { type: "string" },
+          status: { type: "string", enum: ["wished", "armed"] },
+        },
       },
     },
   },
 };
 
 /**
- * answers: one transcript per question, in QUESTIONS order. Sparse is fine: the
- * split screen calls this after every answer with only what it has so far.
+ * answers: keyed by step id. Sparse is fine, the panel calls this after every
+ * answer with only what it has so far.
+ * pomodoro: {work, break} from the tap step, applied directly rather than
+ * inferred, because a choice is not something to re-derive from speech.
  */
-async function yapToNotebook(answers, timezone) {
-  const transcript = QUESTIONS
-    .map((q, i) => `Q: ${q}\nA: ${answers[i] || "(no answer yet)"}`)
+async function yapToNotebook(answers, timezone, pomodoro) {
+  const transcript = VOICE_STEPS
+    .map((s) => `Q (${s.section}): ${s.spoken}\nA: ${(answers && answers[s.id]) || "(no answer yet)"}`)
     .join("\n\n");
 
   const book = await structured({
@@ -192,18 +275,13 @@ async function yapToNotebook(answers, timezone) {
   });
 
   book.timezone = book.timezone || timezone;
+  book.focus = book.focus || {};
+  // The tap wins over anything the model guessed.
+  book.focus.pomodoro = {
+    work: Number(pomodoro?.work) > 0 ? Number(pomodoro.work) : (book.focus.pomodoro?.work || 25),
+    break: Number(pomodoro?.break) > 0 ? Number(pomodoro.break) : (book.focus.pomodoro?.break || 5),
+  };
   return ensureIds(book);
 }
 
-// The same five, marked up for the screen. The phrase between asterisks is set
-// in italic, which is the only emphasis the display type ever gets. What he SAYS
-// is ASKED above, unmarked, because a marker read aloud is just noise.
-const ASKED_DISPLAY = [
-  "So. Walk me through *a normal day* for you.",
-  "What keeps *slipping*?",
-  "When is your head *actually clear* enough for real work?",
-  "What do you *listen to* when you are trying to focus?",
-  "What do you wish *just happened*, without you having to think about it?",
-];
-
-module.exports = { yapToNotebook, QUESTIONS, ASKED, ASKED_DISPLAY, QUESTION_SECTION, NOTEBOOK_SCHEMA, SYSTEM };
+module.exports = { yapToNotebook, PARTS, STEPS, VOICE_STEPS, NOTEBOOK_SCHEMA, SYSTEM };

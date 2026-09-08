@@ -146,7 +146,7 @@ img, svg { max-width: 100%; }
 .ac-forest { --accent: var(--forest);      --accent-ink: var(--forest);     --tint: var(--forest-tint); }
 .ac-greeno { --accent: var(--greeno);      --accent-ink: var(--greeno-dark);--tint: var(--greeno-tint); }
 .ac-ember  { --accent: var(--ember);       --accent-ink: #a86c14;           --tint: var(--ember-tint); }
-.ac-lav    { --accent: var(--lavender);    --accent-ink: var(--lav-ink);    --tint: var(--lav-tint); }
+.ac-lav    { --accent: var(--lav-ink);      --accent-ink: var(--lav-ink);    --tint: var(--lav-tint); }
 
 /* ── type ─────────────────────────────────────────────────────────────────── */
 
@@ -257,6 +257,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 .strip.four { grid-template-columns: repeat(4, 1fr); }
 .strip div { padding: 24px 26px 4px 0; border-right: 1px solid var(--stone); }
 .strip div:last-child { border-right: 0; }
+.strip div + div { padding-left: 26px; }
 .strip b { display: block; font: 400 62px/1 var(--display); letter-spacing: -.035em;
            color: var(--accent-ink); }
 .strip span { display: block; font: 500 15px/1.42 var(--body); color: var(--charcoal);
@@ -421,12 +422,12 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 }
 .live s { text-decoration: none; width: 8px; height: 8px; border-radius: 50%; background: var(--ember); }
 
-.ask { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
-.ask div { border: 2px solid rgba(255,255,235,.3); border-radius: var(--r-card); padding: 22px 24px; }
-.ask i { font-style: normal; font: 600 11.5px/1 var(--body); letter-spacing: .14em;
-         text-transform: uppercase; color: rgba(255,255,235,.5); }
-.ask b { display: block; font: 400 30px/1.1 var(--display); color: var(--on-dark); margin: 12px 0 8px; }
-.ask span { font: 500 15px/1.44 var(--body); color: rgba(255,255,235,.66); }
+.raise { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
+.raise div { border: 2px solid rgba(255,255,235,.3); border-radius: var(--r-card); padding: 22px 24px; }
+.raise i { font-style: normal; font: 600 11.5px/1 var(--body); letter-spacing: .14em;
+           text-transform: uppercase; color: rgba(255,255,235,.5); }
+.raise b { display: block; font: 400 30px/1.1 var(--display); color: var(--on-dark); margin: 12px 0 8px; }
+.raise span { font: 500 15px/1.44 var(--body); color: rgba(255,255,235,.66); }
 
 /* ── the notch, drawn in markup ───────────────────────────────────────────
    Never a pasted screenshot. It stays sharp, it follows the slide, and a
@@ -437,7 +438,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 .shot-bar { height: 30px; border-bottom: 1px solid var(--stone); display: flex; align-items: center;
             gap: 6px; padding: 0 14px; font: 600 10.5px/1 var(--body); color: var(--fog); letter-spacing: .04em; }
 .shot-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--stone); }
-.shot-body { position: relative; height: 300px; }
+.shot-body { position: relative; height: 320px; }
 .nf { position: absolute; top: 0; left: 50%; transform: translateX(-50%);
       width: calc(100% - 56px); border-radius: 0 0 24px 24px; background: #000; color: #fff;
       padding: 16px 22px 18px; }
@@ -453,7 +454,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 .nf-chip.primary { background: rgba(255,255,255,.9); color: #050505; border-color: transparent; }
 .shot-floor { position: absolute; bottom: 0; left: 0; right: 0; padding: 0 18px 14px;
               font: 500 13px/1.4 var(--body); color: var(--fog); }
-.shot .mascot { position: absolute; bottom: 44px; left: 26px; width: 52px; height: 64px; }
+.shot .mascot { position: absolute; bottom: 58px; left: 26px; width: 52px; height: 64px; }
 
 /* ── the guard ────────────────────────────────────────────────────────────
    Half these components style their own <b> as a display-size block title.
@@ -463,7 +464,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 
 .fstep span b, .bigbox span b, .qcell span b, .tiersplit span b, .steps span b,
 .stats span b, .strip span b, .band span b, .note b, .card p b, .bul li b,
-.tract span b, .ask span b, .laws span b, .matrix td b {
+.tract span b, .raise span b, .laws span b, .matrix td b {
   display: inline; font-size: inherit; line-height: inherit;
   letter-spacing: inherit; margin: 0; color: inherit; font-weight: 600;
   font-family: var(--body);
@@ -506,14 +507,6 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 </head>
 <body>
 
-<!-- The mascot, once, as a symbol. Every use below points at it, so the file
-     carries one copy of him rather than three. -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="greeno" viewBox="-8 -34 116 142" overflow="visible">
-    <defs><linearGradient id="gr-body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ecb6a"/><stop offset="0.55" stop-color="#66b04a"/><stop offset="1" stop-color="#3f7a34"/></linearGradient><linearGradient id="gr-limb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#66b04a"/><stop offset="1" stop-color="#3f7a34"/></linearGradient><radialGradient id="gr-glow" cx="36%" cy="28%" r="52%"><stop offset="0" stop-color="#e6ffd0" stop-opacity="0.55"/><stop offset="1" stop-color="#e6ffd0" stop-opacity="0"/></radialGradient></defs><ellipse id="__sbwk_shadow__" cx="50" cy="103" rx="20" ry="4.2" fill="#000" opacity="0.14"/><g id="__sbwk_root__"><g id="__sbwk_moonlegs__" display="none"><g id="__sbwk_mw_r__" transform="translate(56 0)"><g id="__sbwk_mw_rh__" transform="rotate(0 0 82)"><path d="M 0 82 L 0 99" fill="none" stroke="#356b2c" stroke-width="14" stroke-linecap="round"/><path d="M 0 82 L 0 99" fill="none" stroke="url(#gr-limb)" stroke-width="11.4" stroke-linecap="round"/></g></g><g id="__sbwk_mw_l__" transform="translate(44 0)"><g id="__sbwk_mw_lh__" transform="rotate(0 0 82)"><path d="M 0 82 L 0 99" fill="none" stroke="#356b2c" stroke-width="14" stroke-linecap="round"/><path d="M 0 82 L 0 99" fill="none" stroke="url(#gr-limb)" stroke-width="11.4" stroke-linecap="round"/></g></g></g><g id="__sbwk_ll__"><g transform="translate(41 0)"><path d="M 0 82 L 0 99" fill="none" stroke="#356b2c" stroke-width="14" stroke-linecap="round"/><path d="M 0 82 L 0 99" fill="none" stroke="url(#gr-limb)" stroke-width="11.4" stroke-linecap="round"/></g></g><g id="__sbwk_rl__"><g transform="translate(59 0)"><path d="M 0 82 L 0 99" fill="none" stroke="#356b2c" stroke-width="14" stroke-linecap="round"/><path d="M 0 82 L 0 99" fill="none" stroke="url(#gr-limb)" stroke-width="11.4" stroke-linecap="round"/></g></g><g id="__sbwk_la_bg__"><path d="M 24 57 Q 13 62 10 71" fill="none" stroke="#356b2c" stroke-width="13" stroke-linecap="round"/><path d="M 24 57 Q 13 62 10 71" fill="none" stroke="url(#gr-limb)" stroke-width="10.4" stroke-linecap="round"/><circle cx="10" cy="72.5" r="8" fill="#356b2c"/><circle cx="10" cy="72.5" r="6.6" fill="url(#gr-limb)"/></g><g id="__sbwk_ra_bg__"><path d="M 76 57 Q 87 62 90 71" fill="none" stroke="#356b2c" stroke-width="13" stroke-linecap="round"/><path d="M 76 57 Q 87 62 90 71" fill="none" stroke="url(#gr-limb)" stroke-width="10.4" stroke-linecap="round"/><circle cx="90" cy="72.5" r="8" fill="#356b2c"/><circle cx="90" cy="72.5" r="6.6" fill="url(#gr-limb)"/></g><path d="M 50 43 C 68 43 80 52 80 66 C 80 79 70 86 50 86 C 30 86 20 79 20 66 C 20 52 32 43 50 43 Z" fill="none" stroke="#356b2c" stroke-width="3.4"/><path d="M 50 43 C 68 43 80 52 80 66 C 80 79 70 86 50 86 C 30 86 20 79 20 66 C 20 52 32 43 50 43 Z" fill="url(#gr-body)"/><path d="M 22.5 74 C 33 79 67 79 77.5 74 L 77.5 82 C 67 86.6 33 86.6 22.5 82 Z" fill="#6e4b36"/><path d="M 22.5 81 C 33 85.6 67 85.6 77.5 81 L 77.5 82.6 C 67 87.2 33 87.2 22.5 82.6 Z" fill="#523829"/><path d="M 40 62 Q 50 67 60 62" fill="none" stroke="#3f7a34" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/><path d="M 50 16 C 62 16 70 23 70 37 C 70 51 63 59 50 59 C 37 59 30 51 30 37 C 30 23 38 16 50 16 Z" fill="none" stroke="#356b2c" stroke-width="3.4"/><path d="M 50 16 C 62 16 70 23 70 37 C 70 51 63 59 50 59 C 37 59 30 51 30 37 C 30 23 38 16 50 16 Z" fill="url(#gr-body)"/><path d="M 50 16 C 62 16 70 23 70 37 C 70 51 63 59 50 59 C 37 59 30 51 30 37 C 30 23 38 16 50 16 Z" fill="url(#gr-glow)"/><g id="__sbwk_la__"><path d="M 24 57 Q 13 62 10 71" fill="none" stroke="#356b2c" stroke-width="13" stroke-linecap="round"/><path d="M 24 57 Q 13 62 10 71" fill="none" stroke="url(#gr-limb)" stroke-width="10.4" stroke-linecap="round"/><circle cx="10" cy="72.5" r="8" fill="#356b2c"/><circle cx="10" cy="72.5" r="6.6" fill="url(#gr-limb)"/></g><g id="__sbwk_ra__"><path d="M 76 57 Q 87 62 90 71" fill="none" stroke="#356b2c" stroke-width="13" stroke-linecap="round"/><path d="M 76 57 Q 87 62 90 71" fill="none" stroke="url(#gr-limb)" stroke-width="10.4" stroke-linecap="round"/><circle cx="90" cy="72.5" r="8" fill="#356b2c"/><circle cx="90" cy="72.5" r="6.6" fill="url(#gr-limb)"/></g><path id="__sbwk_brow_l__" d="M 32 39 Q 38 35.5 44.5 38.5" fill="none" stroke="#1b2a16" stroke-width="2.7" stroke-linecap="round"/><path id="__sbwk_brow_r__" d="M 68 39 Q 62 35.5 55.5 38.5" fill="none" stroke="#1b2a16" stroke-width="2.7" stroke-linecap="round"/><g id="__sbwk_eye_l__"><ellipse cx="38" cy="48" rx="3.1" ry="3.6" fill="#1b2a16"/><g id="__sbwk_pupil_l__"><circle cx="38.9" cy="46.9" r="1" fill="#fff" opacity="0.85"/></g></g><g id="__sbwk_eye_r__"><ellipse cx="62" cy="48" rx="3.1" ry="3.6" fill="#1b2a16"/><g id="__sbwk_pupil_r__"><circle cx="62.9" cy="46.9" r="1" fill="#fff" opacity="0.85"/></g></g><g id="__sbwk_mouth__"><path id="__sbwk_smile__" d="M 43 55.5 Q 50 58.5 57 55.5" fill="none" stroke="#1b2a16" stroke-width="2.4" stroke-linecap="round"/><g id="__sbwk_talk__" style="display:none"><ellipse id="__sbwk_te__" cx="50" cy="56" rx="4" ry="1.4" fill="#1b2a16"/><ellipse id="__sbwk_ti__" cx="50" cy="56.6" rx="2.4" ry="0.7" fill="#8fce74"/></g></g><g id="__sbwk_specs__" display="none"><circle cx="38" cy="48" r="8.4" fill="none" stroke="#1b2a16" stroke-width="2.6" opacity="0.92"/><circle cx="62" cy="48" r="8.4" fill="none" stroke="#1b2a16" stroke-width="2.6" opacity="0.92"/><path d="M 46.4 48 L 53.6 48" stroke="#1b2a16" stroke-width="2" stroke-linecap="round" opacity="0.92"/></g><g id="__sbwk_fedora__" display="none" transform="rotate(-10 50 16)"><path d="M 34 18 C 34 2 40 -4 50 -4 C 60 -4 66 2 66 18 Z" fill="#14110f"/><ellipse cx="50" cy="18" rx="30" ry="6" fill="#14110f"/></g><g id="__sbwk_react__" display="none"><g id="__sbwk_rs__" display="none"><path d="M 31 40 L 44 40" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path d="M 56 40 L 69 40" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path id="__sbwk_sweat__" d="M 73 30 C 76 34 76 37 73 38 C 70 37 70 34 73 30 Z" fill="#CFEFFF" stroke="#7FB6D9" stroke-width="0.6"/></g><g id="__sbwk_rc__" display="none"><path d="M 32 38 Q 38 32 45 37" fill="none" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path d="M 68 38 Q 62 32 55 37" fill="none" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path d="M 40 52 Q 50 63 60 52 Q 50 55 40 52 Z" fill="#1b2a16"/><g id="__sbwk_confetti__"><circle cx="14" cy="20" r="2.5" fill="#FFD700"/><circle cx="86" cy="18" r="2" fill="#FF69B4"/><circle cx="8" cy="42" r="2" fill="#7EC8E3"/><circle cx="92" cy="40" r="2.2" fill="#90EE90"/><circle cx="22" cy="8" r="1.8" fill="#FF8C42"/><circle cx="78" cy="8" r="1.8" fill="#E14A48"/></g></g><g id="__sbwk_rt__" display="none"><path d="M 32 36 Q 38 41 45 39" fill="none" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path d="M 68 36 Q 62 41 55 39" fill="none" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path id="__sbwk_tear_l__" d="M 34 52 C 37 56 37 58.5 34 59.5 C 31 58.5 31 56 34 52 Z" fill="#DFF4FF"/><path id="__sbwk_tear_r__" d="M 66 52 C 69 56 69 58.5 66 59.5 C 63 58.5 63 56 66 52 Z" fill="#DFF4FF"/></g></g></g>
-  </symbol>
-</svg>
-
 <a class="dl" href="greeno-pitch-deck.pdf" download>Download PDF</a>
 
 <div class="deck">
@@ -530,7 +523,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
       <p style="margin-top:30px"><span class="live"><s></s>Pre-release · macOS</span></p>
     </div>
     <div>
-      <svg class="mascot" viewBox="-8 -34 116 142"><use href="#greeno"/></svg>
+      <svg class="mascot" viewBox="-8 -34 116 142" aria-hidden="true"><defs><linearGradient id="gr-body-c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ecb6a"/><stop offset="0.55" stop-color="#66b04a"/><stop offset="1" stop-color="#3f7a34"/></linearGradient><linearGradient id="gr-limb-c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#66b04a"/><stop offset="1" stop-color="#3f7a34"/></linearGradient><radialGradient id="gr-glow-c" cx="36%" cy="28%" r="52%"><stop offset="0" stop-color="#e6ffd0" stop-opacity="0.55"/><stop offset="1" stop-color="#e6ffd0" stop-opacity="0"/></radialGradient></defs><ellipse id="__sbwk_shadow__-c" cx="50" cy="103" rx="20" ry="4.2" fill="#000" opacity="0.14"/><g id="__sbwk_root__-c"><g id="__sbwk_moonlegs__-c" display="none"><g id="__sbwk_mw_r__-c" transform="translate(56 0)"><g id="__sbwk_mw_rh__-c" transform="rotate(0 0 82)"><path d="M 0 82 L 0 99" fill="none" stroke="#356b2c" stroke-width="14" stroke-linecap="round"/><path d="M 0 82 L 0 99" fill="none" stroke="url(#gr-limb-c)" stroke-width="11.4" stroke-linecap="round"/></g></g><g id="__sbwk_mw_l__-c" transform="translate(44 0)"><g id="__sbwk_mw_lh__-c" transform="rotate(0 0 82)"><path d="M 0 82 L 0 99" fill="none" stroke="#356b2c" stroke-width="14" stroke-linecap="round"/><path d="M 0 82 L 0 99" fill="none" stroke="url(#gr-limb-c)" stroke-width="11.4" stroke-linecap="round"/></g></g></g><g id="__sbwk_ll__-c"><g transform="translate(41 0)"><path d="M 0 82 L 0 99" fill="none" stroke="#356b2c" stroke-width="14" stroke-linecap="round"/><path d="M 0 82 L 0 99" fill="none" stroke="url(#gr-limb-c)" stroke-width="11.4" stroke-linecap="round"/></g></g><g id="__sbwk_rl__-c"><g transform="translate(59 0)"><path d="M 0 82 L 0 99" fill="none" stroke="#356b2c" stroke-width="14" stroke-linecap="round"/><path d="M 0 82 L 0 99" fill="none" stroke="url(#gr-limb-c)" stroke-width="11.4" stroke-linecap="round"/></g></g><g id="__sbwk_la_bg__-c"><path d="M 24 57 Q 13 62 10 71" fill="none" stroke="#356b2c" stroke-width="13" stroke-linecap="round"/><path d="M 24 57 Q 13 62 10 71" fill="none" stroke="url(#gr-limb-c)" stroke-width="10.4" stroke-linecap="round"/><circle cx="10" cy="72.5" r="8" fill="#356b2c"/><circle cx="10" cy="72.5" r="6.6" fill="url(#gr-limb-c)"/></g><g id="__sbwk_ra_bg__-c"><path d="M 76 57 Q 87 62 90 71" fill="none" stroke="#356b2c" stroke-width="13" stroke-linecap="round"/><path d="M 76 57 Q 87 62 90 71" fill="none" stroke="url(#gr-limb-c)" stroke-width="10.4" stroke-linecap="round"/><circle cx="90" cy="72.5" r="8" fill="#356b2c"/><circle cx="90" cy="72.5" r="6.6" fill="url(#gr-limb-c)"/></g><path d="M 50 43 C 68 43 80 52 80 66 C 80 79 70 86 50 86 C 30 86 20 79 20 66 C 20 52 32 43 50 43 Z" fill="none" stroke="#356b2c" stroke-width="3.4"/><path d="M 50 43 C 68 43 80 52 80 66 C 80 79 70 86 50 86 C 30 86 20 79 20 66 C 20 52 32 43 50 43 Z" fill="url(#gr-body-c)"/><path d="M 22.5 74 C 33 79 67 79 77.5 74 L 77.5 82 C 67 86.6 33 86.6 22.5 82 Z" fill="#6e4b36"/><path d="M 22.5 81 C 33 85.6 67 85.6 77.5 81 L 77.5 82.6 C 67 87.2 33 87.2 22.5 82.6 Z" fill="#523829"/><path d="M 40 62 Q 50 67 60 62" fill="none" stroke="#3f7a34" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/><path d="M 50 16 C 62 16 70 23 70 37 C 70 51 63 59 50 59 C 37 59 30 51 30 37 C 30 23 38 16 50 16 Z" fill="none" stroke="#356b2c" stroke-width="3.4"/><path d="M 50 16 C 62 16 70 23 70 37 C 70 51 63 59 50 59 C 37 59 30 51 30 37 C 30 23 38 16 50 16 Z" fill="url(#gr-body-c)"/><path d="M 50 16 C 62 16 70 23 70 37 C 70 51 63 59 50 59 C 37 59 30 51 30 37 C 30 23 38 16 50 16 Z" fill="url(#gr-glow-c)"/><g id="__sbwk_la__-c"><path d="M 24 57 Q 13 62 10 71" fill="none" stroke="#356b2c" stroke-width="13" stroke-linecap="round"/><path d="M 24 57 Q 13 62 10 71" fill="none" stroke="url(#gr-limb-c)" stroke-width="10.4" stroke-linecap="round"/><circle cx="10" cy="72.5" r="8" fill="#356b2c"/><circle cx="10" cy="72.5" r="6.6" fill="url(#gr-limb-c)"/></g><g id="__sbwk_ra__-c"><path d="M 76 57 Q 87 62 90 71" fill="none" stroke="#356b2c" stroke-width="13" stroke-linecap="round"/><path d="M 76 57 Q 87 62 90 71" fill="none" stroke="url(#gr-limb-c)" stroke-width="10.4" stroke-linecap="round"/><circle cx="90" cy="72.5" r="8" fill="#356b2c"/><circle cx="90" cy="72.5" r="6.6" fill="url(#gr-limb-c)"/></g><path id="__sbwk_brow_l__-c" d="M 32 39 Q 38 35.5 44.5 38.5" fill="none" stroke="#1b2a16" stroke-width="2.7" stroke-linecap="round"/><path id="__sbwk_brow_r__-c" d="M 68 39 Q 62 35.5 55.5 38.5" fill="none" stroke="#1b2a16" stroke-width="2.7" stroke-linecap="round"/><g id="__sbwk_eye_l__-c"><ellipse cx="38" cy="48" rx="3.1" ry="3.6" fill="#1b2a16"/><g id="__sbwk_pupil_l__-c"><circle cx="38.9" cy="46.9" r="1" fill="#fff" opacity="0.85"/></g></g><g id="__sbwk_eye_r__-c"><ellipse cx="62" cy="48" rx="3.1" ry="3.6" fill="#1b2a16"/><g id="__sbwk_pupil_r__-c"><circle cx="62.9" cy="46.9" r="1" fill="#fff" opacity="0.85"/></g></g><g id="__sbwk_mouth__-c"><path id="__sbwk_smile__-c" d="M 43 55.5 Q 50 58.5 57 55.5" fill="none" stroke="#1b2a16" stroke-width="2.4" stroke-linecap="round"/><g id="__sbwk_talk__-c" style="display:none"><ellipse id="__sbwk_te__-c" cx="50" cy="56" rx="4" ry="1.4" fill="#1b2a16"/><ellipse id="__sbwk_ti__-c" cx="50" cy="56.6" rx="2.4" ry="0.7" fill="#8fce74"/></g></g><g id="__sbwk_specs__-c" display="none"><circle cx="38" cy="48" r="8.4" fill="none" stroke="#1b2a16" stroke-width="2.6" opacity="0.92"/><circle cx="62" cy="48" r="8.4" fill="none" stroke="#1b2a16" stroke-width="2.6" opacity="0.92"/><path d="M 46.4 48 L 53.6 48" stroke="#1b2a16" stroke-width="2" stroke-linecap="round" opacity="0.92"/></g><g id="__sbwk_fedora__-c" display="none" transform="rotate(-10 50 16)"><path d="M 34 18 C 34 2 40 -4 50 -4 C 60 -4 66 2 66 18 Z" fill="#14110f"/><ellipse cx="50" cy="18" rx="30" ry="6" fill="#14110f"/></g><g id="__sbwk_react__-c" display="none"><g id="__sbwk_rs__-c" display="none"><path d="M 31 40 L 44 40" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path d="M 56 40 L 69 40" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path id="__sbwk_sweat__-c" d="M 73 30 C 76 34 76 37 73 38 C 70 37 70 34 73 30 Z" fill="#CFEFFF" stroke="#7FB6D9" stroke-width="0.6"/></g><g id="__sbwk_rc__-c" display="none"><path d="M 32 38 Q 38 32 45 37" fill="none" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path d="M 68 38 Q 62 32 55 37" fill="none" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path d="M 40 52 Q 50 63 60 52 Q 50 55 40 52 Z" fill="#1b2a16"/><g id="__sbwk_confetti__-c"><circle cx="14" cy="20" r="2.5" fill="#FFD700"/><circle cx="86" cy="18" r="2" fill="#FF69B4"/><circle cx="8" cy="42" r="2" fill="#7EC8E3"/><circle cx="92" cy="40" r="2.2" fill="#90EE90"/><circle cx="22" cy="8" r="1.8" fill="#FF8C42"/><circle cx="78" cy="8" r="1.8" fill="#E14A48"/></g></g><g id="__sbwk_rt__-c" display="none"><path d="M 32 36 Q 38 41 45 39" fill="none" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path d="M 68 36 Q 62 41 55 39" fill="none" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path id="__sbwk_tear_l__-c" d="M 34 52 C 37 56 37 58.5 34 59.5 C 31 58.5 31 56 34 52 Z" fill="#DFF4FF"/><path id="__sbwk_tear_r__-c" d="M 66 52 C 69 56 69 58.5 66 59.5 C 63 58.5 63 56 66 52 Z" fill="#DFF4FF"/></g></g></g></svg>
       <p class="covercap">He waddles around down there while you work. We are aware
         of how that sounds.</p>
     </div>
@@ -622,7 +615,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
               <span class="nf-chip">Later</span>
             </div>
           </div>
-          <svg class="mascot" viewBox="-8 -34 116 142"><use href="#greeno"/></svg>
+          <svg class="mascot" viewBox="-8 -34 116 142" aria-hidden="true"><defs><linearGradient id="gr-body-s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ecb6a"/><stop offset="0.55" stop-color="#66b04a"/><stop offset="1" stop-color="#3f7a34"/></linearGradient><linearGradient id="gr-limb-s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#66b04a"/><stop offset="1" stop-color="#3f7a34"/></linearGradient><radialGradient id="gr-glow-s" cx="36%" cy="28%" r="52%"><stop offset="0" stop-color="#e6ffd0" stop-opacity="0.55"/><stop offset="1" stop-color="#e6ffd0" stop-opacity="0"/></radialGradient></defs><ellipse id="__sbwk_shadow__-s" cx="50" cy="103" rx="20" ry="4.2" fill="#000" opacity="0.14"/><g id="__sbwk_root__-s"><g id="__sbwk_moonlegs__-s" display="none"><g id="__sbwk_mw_r__-s" transform="translate(56 0)"><g id="__sbwk_mw_rh__-s" transform="rotate(0 0 82)"><path d="M 0 82 L 0 99" fill="none" stroke="#356b2c" stroke-width="14" stroke-linecap="round"/><path d="M 0 82 L 0 99" fill="none" stroke="url(#gr-limb-s)" stroke-width="11.4" stroke-linecap="round"/></g></g><g id="__sbwk_mw_l__-s" transform="translate(44 0)"><g id="__sbwk_mw_lh__-s" transform="rotate(0 0 82)"><path d="M 0 82 L 0 99" fill="none" stroke="#356b2c" stroke-width="14" stroke-linecap="round"/><path d="M 0 82 L 0 99" fill="none" stroke="url(#gr-limb-s)" stroke-width="11.4" stroke-linecap="round"/></g></g></g><g id="__sbwk_ll__-s"><g transform="translate(41 0)"><path d="M 0 82 L 0 99" fill="none" stroke="#356b2c" stroke-width="14" stroke-linecap="round"/><path d="M 0 82 L 0 99" fill="none" stroke="url(#gr-limb-s)" stroke-width="11.4" stroke-linecap="round"/></g></g><g id="__sbwk_rl__-s"><g transform="translate(59 0)"><path d="M 0 82 L 0 99" fill="none" stroke="#356b2c" stroke-width="14" stroke-linecap="round"/><path d="M 0 82 L 0 99" fill="none" stroke="url(#gr-limb-s)" stroke-width="11.4" stroke-linecap="round"/></g></g><g id="__sbwk_la_bg__-s"><path d="M 24 57 Q 13 62 10 71" fill="none" stroke="#356b2c" stroke-width="13" stroke-linecap="round"/><path d="M 24 57 Q 13 62 10 71" fill="none" stroke="url(#gr-limb-s)" stroke-width="10.4" stroke-linecap="round"/><circle cx="10" cy="72.5" r="8" fill="#356b2c"/><circle cx="10" cy="72.5" r="6.6" fill="url(#gr-limb-s)"/></g><g id="__sbwk_ra_bg__-s"><path d="M 76 57 Q 87 62 90 71" fill="none" stroke="#356b2c" stroke-width="13" stroke-linecap="round"/><path d="M 76 57 Q 87 62 90 71" fill="none" stroke="url(#gr-limb-s)" stroke-width="10.4" stroke-linecap="round"/><circle cx="90" cy="72.5" r="8" fill="#356b2c"/><circle cx="90" cy="72.5" r="6.6" fill="url(#gr-limb-s)"/></g><path d="M 50 43 C 68 43 80 52 80 66 C 80 79 70 86 50 86 C 30 86 20 79 20 66 C 20 52 32 43 50 43 Z" fill="none" stroke="#356b2c" stroke-width="3.4"/><path d="M 50 43 C 68 43 80 52 80 66 C 80 79 70 86 50 86 C 30 86 20 79 20 66 C 20 52 32 43 50 43 Z" fill="url(#gr-body-s)"/><path d="M 22.5 74 C 33 79 67 79 77.5 74 L 77.5 82 C 67 86.6 33 86.6 22.5 82 Z" fill="#6e4b36"/><path d="M 22.5 81 C 33 85.6 67 85.6 77.5 81 L 77.5 82.6 C 67 87.2 33 87.2 22.5 82.6 Z" fill="#523829"/><path d="M 40 62 Q 50 67 60 62" fill="none" stroke="#3f7a34" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/><path d="M 50 16 C 62 16 70 23 70 37 C 70 51 63 59 50 59 C 37 59 30 51 30 37 C 30 23 38 16 50 16 Z" fill="none" stroke="#356b2c" stroke-width="3.4"/><path d="M 50 16 C 62 16 70 23 70 37 C 70 51 63 59 50 59 C 37 59 30 51 30 37 C 30 23 38 16 50 16 Z" fill="url(#gr-body-s)"/><path d="M 50 16 C 62 16 70 23 70 37 C 70 51 63 59 50 59 C 37 59 30 51 30 37 C 30 23 38 16 50 16 Z" fill="url(#gr-glow-s)"/><g id="__sbwk_la__-s"><path d="M 24 57 Q 13 62 10 71" fill="none" stroke="#356b2c" stroke-width="13" stroke-linecap="round"/><path d="M 24 57 Q 13 62 10 71" fill="none" stroke="url(#gr-limb-s)" stroke-width="10.4" stroke-linecap="round"/><circle cx="10" cy="72.5" r="8" fill="#356b2c"/><circle cx="10" cy="72.5" r="6.6" fill="url(#gr-limb-s)"/></g><g id="__sbwk_ra__-s"><path d="M 76 57 Q 87 62 90 71" fill="none" stroke="#356b2c" stroke-width="13" stroke-linecap="round"/><path d="M 76 57 Q 87 62 90 71" fill="none" stroke="url(#gr-limb-s)" stroke-width="10.4" stroke-linecap="round"/><circle cx="90" cy="72.5" r="8" fill="#356b2c"/><circle cx="90" cy="72.5" r="6.6" fill="url(#gr-limb-s)"/></g><path id="__sbwk_brow_l__-s" d="M 32 39 Q 38 35.5 44.5 38.5" fill="none" stroke="#1b2a16" stroke-width="2.7" stroke-linecap="round"/><path id="__sbwk_brow_r__-s" d="M 68 39 Q 62 35.5 55.5 38.5" fill="none" stroke="#1b2a16" stroke-width="2.7" stroke-linecap="round"/><g id="__sbwk_eye_l__-s"><ellipse cx="38" cy="48" rx="3.1" ry="3.6" fill="#1b2a16"/><g id="__sbwk_pupil_l__-s"><circle cx="38.9" cy="46.9" r="1" fill="#fff" opacity="0.85"/></g></g><g id="__sbwk_eye_r__-s"><ellipse cx="62" cy="48" rx="3.1" ry="3.6" fill="#1b2a16"/><g id="__sbwk_pupil_r__-s"><circle cx="62.9" cy="46.9" r="1" fill="#fff" opacity="0.85"/></g></g><g id="__sbwk_mouth__-s"><path id="__sbwk_smile__-s" d="M 43 55.5 Q 50 58.5 57 55.5" fill="none" stroke="#1b2a16" stroke-width="2.4" stroke-linecap="round"/><g id="__sbwk_talk__-s" style="display:none"><ellipse id="__sbwk_te__-s" cx="50" cy="56" rx="4" ry="1.4" fill="#1b2a16"/><ellipse id="__sbwk_ti__-s" cx="50" cy="56.6" rx="2.4" ry="0.7" fill="#8fce74"/></g></g><g id="__sbwk_specs__-s" display="none"><circle cx="38" cy="48" r="8.4" fill="none" stroke="#1b2a16" stroke-width="2.6" opacity="0.92"/><circle cx="62" cy="48" r="8.4" fill="none" stroke="#1b2a16" stroke-width="2.6" opacity="0.92"/><path d="M 46.4 48 L 53.6 48" stroke="#1b2a16" stroke-width="2" stroke-linecap="round" opacity="0.92"/></g><g id="__sbwk_fedora__-s" display="none" transform="rotate(-10 50 16)"><path d="M 34 18 C 34 2 40 -4 50 -4 C 60 -4 66 2 66 18 Z" fill="#14110f"/><ellipse cx="50" cy="18" rx="30" ry="6" fill="#14110f"/></g><g id="__sbwk_react__-s" display="none"><g id="__sbwk_rs__-s" display="none"><path d="M 31 40 L 44 40" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path d="M 56 40 L 69 40" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path id="__sbwk_sweat__-s" d="M 73 30 C 76 34 76 37 73 38 C 70 37 70 34 73 30 Z" fill="#CFEFFF" stroke="#7FB6D9" stroke-width="0.6"/></g><g id="__sbwk_rc__-s" display="none"><path d="M 32 38 Q 38 32 45 37" fill="none" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path d="M 68 38 Q 62 32 55 37" fill="none" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path d="M 40 52 Q 50 63 60 52 Q 50 55 40 52 Z" fill="#1b2a16"/><g id="__sbwk_confetti__-s"><circle cx="14" cy="20" r="2.5" fill="#FFD700"/><circle cx="86" cy="18" r="2" fill="#FF69B4"/><circle cx="8" cy="42" r="2" fill="#7EC8E3"/><circle cx="92" cy="40" r="2.2" fill="#90EE90"/><circle cx="22" cy="8" r="1.8" fill="#FF8C42"/><circle cx="78" cy="8" r="1.8" fill="#E14A48"/></g></g><g id="__sbwk_rt__-s" display="none"><path d="M 32 36 Q 38 41 45 39" fill="none" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path d="M 68 36 Q 62 41 55 39" fill="none" stroke="#1b2a16" stroke-width="2.6" stroke-linecap="round"/><path id="__sbwk_tear_l__-s" d="M 34 52 C 37 56 37 58.5 34 59.5 C 31 58.5 31 56 34 52 Z" fill="#DFF4FF"/><path id="__sbwk_tear_r__-s" d="M 66 52 C 69 56 69 58.5 66 59.5 C 63 58.5 63 56 66 52 Z" fill="#DFF4FF"/></g></g></g></svg>
           <p class="shot-floor">He is not a window you have to go and open.</p>
         </div>
       </div>
@@ -678,7 +671,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
     <div class="steps">
       <div>
         <i>1</i>
-        <b>The yap</b>
+        <b>The conversation</b>
         <span>Five questions, out loud. A normal day, what keeps slipping, when your
           head is clear, what you listen to, and what you wish just happened on its own.</span>
       </div>
@@ -790,8 +783,9 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
         <i>Paid</i>
         <div class="p">$20 <small>a month</small></div>
         <p style="font:500 15.5px/1.46 var(--body);color:var(--charcoal);margin:8px 0 0">
-          Calendar and inbox, the stuck nudge, focus mode, routines, and Hera
-          dictation. Everything that needs your day, not just your attention.</p>
+          Calendar and inbox, the stuck nudge, focus mode, routines, and
+          dictation into any app. Everything that needs your day, not just your
+          attention.</p>
       </div>
     </div>
     <div class="band" style="margin-top:24px">
@@ -877,19 +871,19 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
       <div class="qcell">
         <i>Q2 2027</i>
         <b>The character</b>
-        <span>Moment routing in the voice path, reaction states, and the stuck nudge
-          firing on real screen events.</span>
+        <span>He reacts to the situation in voice and not just in text, and the stuck
+          nudge starts firing on real screen events.</span>
       </div>
       <div class="qcell">
         <i>Q3 2027</i>
         <b>Week one</b>
-        <span>In context micro questions and Hera dictation, so he keeps getting
-          sharper after the yap is over.</span>
+        <span>In context micro questions and Hera, the system wide dictation, so he
+          keeps getting sharper after that first conversation.</span>
       </div>
     </div>
-    <p class="note wide">Everything after the first column is gated on one result. If
-      the day seven greet does not beat the day one greet, the learning layer is not
-      working and we fix that before we build anything else.</p>
+    <p class="note wide">The second column is the one that unlocks the rest. Until
+      the calendar and the inbox are connected, the morning greet is working from
+      what you told him and nothing else.</p>
   </div>
   <span class="num">12 / 13</span>
 </section></div>
@@ -908,7 +902,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
       <p style="margin-top:26px"><span class="live"><s></s>Pre-release · Early access open</span></p>
     </div>
     <div>
-      <div class="ask" style="grid-template-columns:1fr;margin-top:0">
+      <div class="raise" style="grid-template-columns:1fr;margin-top:0">
         <div>
           <i>The raise</i>
           <b class="tbd">fill in</b>

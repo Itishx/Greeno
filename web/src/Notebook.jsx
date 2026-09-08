@@ -76,13 +76,17 @@ export default function Notebook({ onRedo, onHome }) {
         )}
 
         {tab === "habits" && (
-          <Habits
-            habits={prog}
-            slipping={book?.slipping || []}
-            dueToday={state.dueToday || []}
-            onChange={apply}
-            flash={flash}
-          />
+          <>
+            <Stats week={state.week} habits={prog} />
+            <WeekGrid habits={prog} days={state.days || []} onChange={apply} flash={flash} />
+            <Habits
+              habits={prog}
+              slipping={book?.slipping || []}
+              dueToday={state.dueToday || []}
+              onChange={apply}
+              flash={flash}
+            />
+          </>
         )}
 
         {tab === "focus" && (
@@ -99,6 +103,72 @@ export default function Notebook({ onRedo, onHome }) {
 
         {tab === "setup" && <Setup state={state} reload={load} flash={flash} />}
       </div>
+    </div>
+  );
+}
+
+// ── the numbers people come back for ───────────────────────────────────────
+function Stats({ week, habits }) {
+  if (!week) return null;
+  const doneToday = habits.filter((h) => h.todayValue >= h.target).length;
+  return (
+    <div className="stats">
+      <div className="stat">
+        <span className="stat-n">{doneToday}<i>/{habits.length}</i></span>
+        <span className="stat-l">done today</span>
+      </div>
+      <div className="stat">
+        <span className="stat-n">{week.pct}<i>%</i></span>
+        <span className="stat-l">this week</span>
+      </div>
+      <div className="stat">
+        <span className="stat-n">{week.bestStreak}</span>
+        <span className="stat-l">best streak</span>
+      </div>
+      <div className="stat">
+        <span className="stat-n">{week.done}<i>/{week.possible}</i></span>
+        <span className="stat-l">checked off</span>
+      </div>
+    </div>
+  );
+}
+
+// ── the grid ───────────────────────────────────────────────────────────────
+// Habits down, days across, and every cell is clickable. This is the view that
+// makes the thing legible at a glance: you see the gaps, not a list of numbers.
+function WeekGrid({ habits, days, onChange, flash }) {
+  if (!habits.length) return null;
+
+  async function toggle(h, cell) {
+    const value = cell.hit ? 0 : h.target;
+    onChange(await api("checkin", { habitId: h.id, day: cell.day, value }));
+    flash(value ? "Logged." : "Cleared.");
+  }
+
+  return (
+    <div className="grid-wrap">
+      <div className="grid-head">
+        <span />
+        {days.map((d) => (
+          <span key={d.day} className={`grid-day${d.isToday ? " is-today" : ""}`}>{d.label}</span>
+        ))}
+        <span />
+      </div>
+      {habits.map((h) => (
+        <div className="grid-row" key={h.id}>
+          <span className="grid-name">{h.title}</span>
+          {(h.week || []).map((c) => (
+            <button
+              key={c.day}
+              className={`cell${c.hit ? " is-hit" : ""}${c.partial ? " is-partial" : ""}${c.isToday ? " is-today" : ""}`}
+              onClick={() => toggle(h, c)}
+              title={`${c.day}: ${c.value} ${h.unit}`}
+              aria-label={`${h.title} on ${c.day}`}
+            />
+          ))}
+          <span className="grid-streak">{h.streak > 1 ? `${h.streak}d` : ""}</span>
+        </div>
+      ))}
     </div>
   );
 }

@@ -203,12 +203,13 @@ img, svg { max-width: 100%; }
 .nav-links a {
   font-size: 14px; font-weight: 500; color: var(--charcoal); text-decoration: none;
   padding: 8px 12px; border-radius: var(--r-btn);
+  white-space: nowrap;
   transition: background 140ms ease;
 }
 .nav-links a:hover { background: var(--stone); }
 .nav-cta { margin-left: 6px; }
 .nav-deck { padding: 9px 15px; font-size: 14px; margin-left: 6px; }
-@media (max-width: 900px) {
+@media (max-width: 1080px) {
   .nav-links { display: none; }
   .nav-deck { margin-left: auto; }
   .nav-cta { margin-left: 6px; }
