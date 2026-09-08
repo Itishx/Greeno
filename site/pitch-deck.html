@@ -192,6 +192,10 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 .pack { padding-top: 48px; }
 .pack h2 { font-size: 42px; }
 .rows td, .rows th { font-size: 15px !important; }
+.rows .matrix td { padding-top: 12px; padding-bottom: 12px; }
+/* .pack exists for a full table plus its source line. Without this the header
+   row sits directly under the headline with no air at all. */
+.pack .body.top { margin-top: 20px; }
 
 /* ── cards ────────────────────────────────────────────────────────────────── */
 
@@ -222,7 +226,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 .fork.three .card .tag { align-self: flex-start; }
 
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
-.split { display: grid; grid-template-columns: 1.5fr 1fr; gap: 44px; align-items: center; }
+.split { display: grid; grid-template-columns: 1.35fr 1fr; gap: 44px; align-items: center; }
 .comp  { display: grid; grid-template-columns: 1.7fr 1fr; gap: 30px; align-items: start; }
 
 .bigbox {
@@ -325,6 +329,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
   transform: rotate(-45deg);
 }
 .slide.forest .ticks li { color: rgba(255,255,235,.82); }
+.slide.forest .ticks li::before { border-color: var(--greeno-light); }
 
 /* the allowlist chips, lifted from the site so the deck and the page agree */
 .chips { display: flex; flex-wrap: wrap; gap: 9px; }
@@ -403,7 +408,8 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 .markrow { display: flex; align-items: flex-end; gap: 22px; }
 .cover h1 { color: var(--on-dark); }
 .cover .sig { font: 500 19px/1.5 var(--body); color: rgba(255,255,235,.74); margin: 26px 0 0; max-width: 40ch; }
-.cover .mascot { width: 210px; }
+.mascot { display: block; }
+.cover .mascot { width: 210px; height: 257px; }
 .covercap {
   font: 500 15px/1.4 var(--body); color: rgba(255,255,235,.44);
   margin-top: 22px; max-width: 30ch;
@@ -431,9 +437,9 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 .shot-bar { height: 30px; border-bottom: 1px solid var(--stone); display: flex; align-items: center;
             gap: 6px; padding: 0 14px; font: 600 10.5px/1 var(--body); color: var(--fog); letter-spacing: .04em; }
 .shot-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--stone); }
-.shot-body { position: relative; height: 234px; }
+.shot-body { position: relative; height: 300px; }
 .nf { position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-      width: 430px; border-radius: 0 0 24px 24px; background: #000; color: #fff;
+      width: calc(100% - 56px); border-radius: 0 0 24px 24px; background: #000; color: #fff;
       padding: 16px 22px 18px; }
 .nf-label { font: 650 9px/1 var(--body); letter-spacing: .14em; text-transform: uppercase;
             color: rgba(255,255,255,.6); }
@@ -447,7 +453,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 .nf-chip.primary { background: rgba(255,255,255,.9); color: #050505; border-color: transparent; }
 .shot-floor { position: absolute; bottom: 0; left: 0; right: 0; padding: 0 18px 14px;
               font: 500 13px/1.4 var(--body); color: var(--fog); }
-.shot .mascot { position: absolute; bottom: 30px; left: 30px; width: 62px; }
+.shot .mascot { position: absolute; bottom: 44px; left: 26px; width: 52px; height: 64px; }
 
 /* ── the guard ────────────────────────────────────────────────────────────
    Half these components style their own <b> as a display-size block title.
@@ -555,7 +561,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 </section></div>
 
 <!-- ── 3. the gap ─────────────────────────────────────────────────────────── -->
-<div class="fit"><section class="slide ac-lav dense">
+<div class="fit"><section class="slide ac-lav">
   <div class="head">
     <p class="kicker">Where the market is today</p>
     <h2>Two categories, and neither one does <span class="em">both jobs.</span></h2>
@@ -626,7 +632,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 </section></div>
 
 <!-- ── 5. the three moments ───────────────────────────────────────────────── -->
-<div class="fit"><section class="slide ac-greeno dense">
+<div class="fit"><section class="slide ac-greeno">
   <div class="head">
     <p class="kicker">The moat</p>
     <h2>He shows up at <span class="em">exactly three moments.</span></h2>
@@ -663,7 +669,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 </section></div>
 
 <!-- ── 6. onboarding ──────────────────────────────────────────────────────── -->
-<div class="fit"><section class="slide ac-lav dense">
+<div class="fit"><section class="slide ac-lav">
   <div class="head">
     <p class="kicker">How he learns you</p>
     <h2>Seven minutes of talking. <span class="em">Zero typed forms.</span></h2>
@@ -701,7 +707,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 </section></div>
 
 <!-- ── 7. the allowlist ───────────────────────────────────────────────────── -->
-<div class="fit"><section class="slide ac-ember dense">
+<div class="fit"><section class="slide ac-ember">
   <div class="head">
     <p class="kicker">Trust</p>
     <h2>A closed list. <span class="em">Nothing else, ever.</span></h2>
@@ -766,7 +772,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 </section></div>
 
 <!-- ── 9. business model ──────────────────────────────────────────────────── -->
-<div class="fit"><section class="slide ac-forest dense">
+<div class="fit"><section class="slide ac-forest">
   <div class="head">
     <p class="kicker">Business model</p>
     <h2>How we make money.</h2>
@@ -800,7 +806,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 </section></div>
 
 <!-- ── 10. traction ───────────────────────────────────────────────────────── -->
-<div class="fit"><section class="slide ac-greeno dense">
+<div class="fit"><section class="slide ac-greeno">
   <div class="head">
     <p class="kicker">Traction</p>
     <h2>Where we are today.</h2>
@@ -827,7 +833,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
     <p class="kicker">Competition</p>
     <h2>The competition.</h2>
   </div>
-  <div class="body top" style="margin-top:26px">
+  <div class="body top">
     <table class="matrix">
       <thead>
         <tr><th>Category</th><th>What it does</th><th>What it leaves you</th><th>Price</th></tr>
@@ -849,7 +855,7 @@ h2 { font-size: 52px;  letter-spacing: -.028em; line-height: 1.0; }
 
 <!-- ── 12. roadmap ────────────────────────────────────────────────────────
      Dates live on this slide and nowhere else in the deck. -->
-<div class="fit"><section class="slide ac-lav dense">
+<div class="fit"><section class="slide ac-lav">
   <div class="head">
     <p class="kicker">Roadmap</p>
     <h2>What we build next.</h2>

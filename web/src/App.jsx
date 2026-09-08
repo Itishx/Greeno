@@ -5,7 +5,16 @@ import Onboarding from "./Onboarding.jsx";
 import Notebook from "./Notebook.jsx";
 
 export default function App() {
-  const [view, setView] = useState("landing");   // landing | onboarding | notebook
+  // site/ is the landing page now, and its "Get started" is what brings you
+  // here. Showing a SECOND landing page with a SECOND Get started was a step
+  // that existed only because this app used to own the front door.
+  //
+  // So /app goes straight to work: the notebook if there is one, otherwise the
+  // first question. ?home=1 still reaches the in-app landing for anyone who
+  // wants it.
+  const wantsHome = typeof window !== "undefined"
+    && new URLSearchParams(window.location.search).has("home");
+  const [view, setView] = useState(wantsHome ? "landing" : null);   // null until state says which
   const [state, setState] = useState(null);
   const [error, setError] = useState("");
 
@@ -23,17 +32,23 @@ export default function App() {
   }
   if (!state) return <div className="nbk-loading">One second…</div>;
 
+  // First render after state arrives: pick where to land.
+  if (view === null) {
+    setView(state.notebook && state.approved ? "notebook" : "onboarding");
+    return <div className="nbk-loading">One second…</div>;
+  }
+
   if (view === "onboarding") {
     return (
       <Onboarding
         state={state}
-        onQuit={() => setView("landing")}
+        onQuit={() => setView(state.notebook ? "notebook" : "landing")}
         onDone={async () => { await refresh(); setView("notebook"); }}
       />
     );
   }
   if (view === "notebook") {
-    return <Notebook onHome={() => setView("landing")} onRedo={() => setView("onboarding")} />;
+    return <Notebook onHome={() => { window.location.href = "/"; }} onRedo={() => setView("onboarding")} />;
   }
   return (
     <Landing
