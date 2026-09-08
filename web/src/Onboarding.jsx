@@ -168,7 +168,9 @@ export default function Onboarding({ state, onDone, onQuit }) {
                   className={`ob-choice${pomodoro.work === c.work ? " is-on" : ""}`}
                   onClick={() => pickPomodoro(c)}
                 >
-                  <b>{c.label}</b><span>{c.note}</span>
+                  <b>{c.label}</b>
+                  <span className="ob-choice-sub">{c.sub}</span>
+                  <span className="ob-choice-note">{c.note}</span>
                 </button>
               ))}
             </div>

@@ -55,7 +55,7 @@ const PARTS = [
     title: "Focus",
     // Explained before it is asked about. "What do you listen to" arriving with
     // no context is what made the old version feel arbitrary.
-    intro: "Focus mode is a timer. You say start, I put your music on and count you down.",
+    intro: "Focus mode is a timer for working in stretches. You work for a set time, then I make you take a short break, then you go again. You tell me to start, I put your music on and count you down.",
     steps: [
       {
         id: "focus_music",
@@ -68,13 +68,28 @@ const PARTS = [
       {
         id: "focus_pomodoro",
         mode: "choice",
-        spoken: "How long should one focus block be?",
-        display: "How long is one *focus block*?",
-        helper: "You can change this later.",
+        spoken: "Last focus thing. How long do you want to work before a break? Twenty five minutes on and five off is the usual one. Pick whichever suits you.",
+        display: "How long do you want to *work before a break*?",
+        helper: "You work, I count down, then I make you stop for a bit. That is one block. Change it any time.",
         choices: [
-          { value: "25/5", work: 25, brk: 5, label: "25 / 5", note: "classic" },
-          { value: "50/10", work: 50, brk: 10, label: "50 / 10", note: "deep" },
-          { value: "90/20", work: 90, brk: 20, label: "90 / 20", note: "long haul" },
+          {
+            value: "25/5", work: 25, brk: 5,
+            label: "25 minutes of work",
+            sub: "then a 5 minute break",
+            note: "The usual one. Good if you get distracted easily.",
+          },
+          {
+            value: "50/10", work: 50, brk: 10,
+            label: "50 minutes of work",
+            sub: "then a 10 minute break",
+            note: "Longer stretches, for proper deep work.",
+          },
+          {
+            value: "90/20", work: 90, brk: 20,
+            label: "90 minutes of work",
+            sub: "then a 20 minute break",
+            note: "One big push. Good if you take a while to get going.",
+          },
         ],
       },
       {
