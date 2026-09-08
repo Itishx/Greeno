@@ -140,11 +140,15 @@ Rules that decide whether this works:
 
 4. Times become 24-hour "HH:MM". "After lunch" is 13:00. "Morning" with no hour is 09:00. "Nine to eleven" is 09:00 to 11:00.
 
-5. If they never said when their day starts, infer it from their earliest routine, and otherwise use 08:30.
+5. If they never said when their day starts, infer it from their earliest routine, otherwise use 08:30, and set startTimeGuessed to true. Set it to false only when they actually told you.
+
+5b. An end time you were not given is a guess. "Standup at eleven" has no end, so end is an empty string. Same for a focus window: if they said "mornings" and named no hour, start and end are empty and "said" carries their phrase.
 
 6. Empty is better than wrong. An empty array is a question at read-back; a wrong entry is a correction, and corrections are what lose the approval.
 
 7. Anything they wished happened by itself goes in automations with status "wished", even if it sounds impossible.
+
+7b. "aim" is the thing they said they are working towards. Their words. If they did not say, both fields are empty strings.
 
 8. Never use an em-dash or an en-dash anywhere in any field.`;
 
@@ -153,10 +157,25 @@ const DAY_ENUM = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 const NOTEBOOK_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["startTime", "timezone", "routines", "habits", "focus", "automations", "slipping"],
+  required: ["startTime", "startTimeGuessed", "timezone", "aim", "routines", "habits", "focus", "automations", "slipping"],
   properties: {
     startTime: { type: "string", description: "HH:MM, when their day starts" },
+    // So the read-back can say "I guessed 08:30, fix it here" rather than
+    // presenting a default as though they had told us.
+    startTimeGuessed: { type: "boolean", description: "true when they never said a wake time and it was defaulted" },
     timezone: { type: "string" },
+
+    // What the last question asks about. Without this the answer was collected
+    // and thrown away.
+    aim: {
+      type: "object",
+      additionalProperties: false,
+      required: ["title", "detail"],
+      properties: {
+        title: { type: "string", description: "the one thing they are working towards, their words, empty string if they did not say" },
+        detail: { type: "string", description: "any why or deadline they volunteered, empty string if none" },
+      },
+    },
 
     habits: {
       type: "array",
@@ -183,18 +202,25 @@ const NOTEBOOK_SCHEMA = {
     focus: {
       type: "object",
       additionalProperties: false,
-      required: ["deepWork", "distractions", "music", "pomodoro"],
+      // No pomodoro here on purpose. strict json_schema with
+      // additionalProperties:false makes every property required, so asking the
+      // model for it would force it to invent two integers from a transcript
+      // that never mentions minutes. It comes from the tap and is merged in JS.
+      required: ["deepWork", "distractions", "music"],
       properties: {
         deepWork: {
           type: "array",
           items: {
             type: "object",
             additionalProperties: false,
-            required: ["days", "start", "end"],
+            required: ["said", "days", "start", "end"],
             properties: {
+              // What gets shown back to them is their phrase, not a clock range
+              // they never spoke. "mornings before eleven" reads as theirs.
+              said: { type: "string", description: "their own phrase for the window, verbatim" },
               days: { type: "array", items: { type: "string", enum: DAY_ENUM } },
-              start: { type: "string" },
-              end: { type: "string" },
+              start: { type: "string", description: "HH:MM only if they named the hour, otherwise empty string" },
+              end: { type: "string", description: "HH:MM only if they named the hour, otherwise empty string" },
             },
           },
         },
@@ -202,20 +228,13 @@ const NOTEBOOK_SCHEMA = {
         music: {
           type: "object",
           additionalProperties: false,
-          required: ["mood", "service", "playlist"],
+          required: ["mood", "service", "playlist", "tracks"],
           properties: {
             mood: { type: "string" },
             service: { type: "string", enum: ["spotify", "apple", "none"] },
             playlist: { type: "string" },
-          },
-        },
-        pomodoro: {
-          type: "object",
-          additionalProperties: false,
-          required: ["work", "break"],
-          properties: {
-            work: { type: "number", description: "minutes of work, default 25" },
-            break: { type: "number", description: "minutes of break, default 5" },
+            // The actual songs and artists, as said. A vibe with no names gives [].
+            tracks: { type: "array", items: { type: "string" }, description: "song or artist names exactly as they said them" },
           },
         },
       },
@@ -232,7 +251,7 @@ const NOTEBOOK_SCHEMA = {
           label: { type: "string" },
           days: { type: "array", items: { type: "string", enum: DAY_ENUM } },
           start: { type: "string" },
-          end: { type: "string" },
+          end: { type: "string", description: "HH:MM only if they said when it ends, otherwise empty string. Never guess a duration." },
           kind: { type: "string", enum: ["fixed", "deep_work", "flexible"] },
         },
       },

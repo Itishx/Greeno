@@ -255,6 +255,8 @@ function rowsFor(section, book) {
     return [
       ...(book.routines || []).map((r) => ({ key: `r:${r.id}`, title: r.label, meta: `${(r.days || []).join(" ")} · ${r.start}-${r.end}` })),
       ...(book.automations || []).map((a) => ({ key: `a:${a.id}`, title: a.title, why: a.detail, meta: a.status === "wished" ? "wished for" : a.trigger })),
+      // The last question's answer. It used to be collected and discarded.
+      ...(book.aim?.title ? [{ key: "aim", title: book.aim.title, why: book.aim.detail, meta: "working towards" }] : []),
     ];
   }
   if (section === "habits") {
@@ -270,7 +272,12 @@ function rowsFor(section, book) {
   const out = [];
   const f = book.focus || {};
   if (f.pomodoro?.work) out.push({ key: "p", title: `${f.pomodoro.work} / ${f.pomodoro.break}`, meta: "focus block" });
-  (f.deepWork || []).forEach((w, n) => out.push({ key: `d:${n}`, title: "Deep work", meta: `${(w.days || []).join(" ")} · ${w.start}-${w.end}` }));
+  // Their phrase leads. A clock range they never spoke does not read as theirs.
+  (f.deepWork || []).forEach((w, n) => out.push({
+    key: `d:${n}`,
+    title: w.said || "Deep work",
+    meta: [w.days?.length ? w.days.join(" ") : "", w.start && w.end ? `${w.start}-${w.end}` : w.start || ""].filter(Boolean).join(" · ") || "focus window",
+  }));
   (f.distractions || []).forEach((d, n) => out.push({ key: `x:${n}:${d}`, title: d, meta: "breaks your focus" }));
   if (f.music && (f.music.mood || f.music.playlist)) {
     out.push({
@@ -279,6 +286,7 @@ function rowsFor(section, book) {
       meta: f.music.service && f.music.service !== "none" ? f.music.service : "music",
     });
   }
+  (f.music?.tracks || []).forEach((t, n) => out.push({ key: `t:${n}:${t}`, title: t, meta: "on repeat" }));
   return out;
 }
 

@@ -62,14 +62,31 @@ test("the summarizer fills the three sections from a real yap", opts, async () =
 
   for (const r of book.routines) {
     assert.ok(nb.toMinutes(r.start) !== null, `routine "${r.label}" has an unparseable start: ${r.start}`);
-    assert.ok(nb.toMinutes(r.end) !== null, `routine "${r.label}" has an unparseable end: ${r.end}`);
+    // An end you were never given is a guess. "A lab in the afternoon" has no
+    // end, so empty is the honest answer and the only other legal value is a
+    // real time. What must never appear is an invented one.
+    assert.ok(r.end === "" || nb.toMinutes(r.end) !== null,
+      `routine "${r.label}" has an end that is neither empty nor a real time: ${r.end}`);
   }
+
+  // The last question's answer has somewhere to live now.
+  assert.ok(book.aim && typeof book.aim.title === "string", "aim is missing from the notebook");
+  assert.ok(/startup/i.test(book.aim.title), `the aim did not survive: ${JSON.stringify(book.aim)}`);
+
+  // A default presented as though they had told us is a small lie.
+  assert.strictEqual(typeof book.startTimeGuessed, "boolean");
+
+  // Their own phrasing for a focus window, not a clock range they never spoke.
+  const dw = book.focus.deepWork[0];
+  if (dw) assert.ok(typeof dw.said === "string", "deepWork lost the phrase they actually used");
   assert.ok(nb.toMinutes(book.startTime) !== null, `startTime is unparseable: ${book.startTime}`);
   assert.ok(!/[—–]/.test(JSON.stringify(book)), "the notebook contains an em-dash or en-dash");
 
   console.log("\n  habits:", book.habits.map((h) => `${h.title} [${h.state}] ${h.target} ${h.unit}/${h.cadence}`).join(" | "));
   console.log("  routines:", book.routines.map((r) => `${r.label} ${r.start}-${r.end}`).join(" | "));
-  console.log("  focus:", JSON.stringify(book.focus.pomodoro), book.focus.distractions.join(", "));
+  console.log("  focus:", JSON.stringify(book.focus.pomodoro), "|", book.focus.distractions.join(", "),
+    "| window:", JSON.stringify(book.focus.deepWork.map((w) => w.said)));
+  console.log("  aim:", JSON.stringify(book.aim), "| startTime", book.startTime, "guessed:", book.startTimeGuessed);
 });
 
 test("not mentioning a habit is not the same as failing at it", opts, async () => {
